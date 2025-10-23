@@ -1,10 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { User } from '../db/models/User.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
 
-// POST /api/character - Create a new character
-router.post('/character', async (req: Request, res: Response) => {
+// POST /api/character - Create a character for authenticated user
+router.post('/character', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { characterName } = req.body;
 
@@ -40,13 +41,22 @@ router.post('/character', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Character name already taken' });
     }
 
-    // TODO: Update to use authenticated user ID when auth is implemented
-    // For now, create a new User document with just the characterName
-    const newUser = new User({
-      characterName: trimmedName,
-    });
+    // Get authenticated user
+    const userId = req.user!.userId;
+    const user = await User.findById(userId);
 
-    await newUser.save();
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if user already has a character name
+    if (user.characterName) {
+      return res.status(400).json({ error: 'You already have a character' });
+    }
+
+    // Update user with character name
+    user.characterName = trimmedName;
+    await user.save();
 
     return res.status(201).json({
       success: true,
