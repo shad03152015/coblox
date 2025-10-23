@@ -3,6 +3,7 @@ import { createServer } from "http";
 import path from "path";
 import { fileURLToPath } from "url";
 import { connectDB } from "./db/index.js";
+import authRoutes from "./routes/auth.js";
 import characterRoutes from "./routes/character.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,6 +20,7 @@ async function startServer() {
   app.use(express.json());
 
   // API routes
+  app.use('/api', authRoutes);
   app.use('/api', characterRoutes);
 
   // Serve static files from dist/public in production
