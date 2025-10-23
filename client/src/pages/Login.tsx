@@ -100,16 +100,16 @@ export default function Login() {
 
           {/* Tabs for Login and Register */}
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100">
+            <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-b-2 border-gray-200 rounded-none">
               <TabsTrigger
                 value="login"
-                className="text-cyan-500 data-[state=active]:text-white data-[state=active]:bg-cyan-500"
+                className="text-cyan-500 data-[state=active]:text-cyan-500 data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 rounded-none border-b-2 border-transparent"
               >
                 Login
               </TabsTrigger>
               <TabsTrigger
                 value="register"
-                className="text-gray-500 data-[state=active]:text-white data-[state=active]:bg-cyan-500"
+                className="text-gray-500 data-[state=active]:text-cyan-500 data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 rounded-none border-b-2 border-transparent"
               >
                 Register
               </TabsTrigger>
