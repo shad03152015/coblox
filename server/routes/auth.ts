@@ -7,28 +7,34 @@ const router = Router();
 
 // POST /api/auth/register - Register a new user
 router.post('/auth/register', async (req: Request, res: Response) => {
+  console.log('🔵 Registration attempt:', { email: req.body.email });
+
   try {
     const { email, password } = req.body;
 
     // Validate required fields
     if (!email || !password) {
+      console.log('❌ Missing email or password');
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
+      console.log('❌ Invalid email format:', email);
       return res.status(400).json({ error: 'Invalid email format' });
     }
 
     // Validate password length
     if (password.length < 6) {
+      console.log('❌ Password too short');
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
+      console.log('❌ Email already registered:', email);
       return res.status(400).json({ error: 'Email already registered' });
     }
 
@@ -42,6 +48,7 @@ router.post('/auth/register', async (req: Request, res: Response) => {
     });
 
     await newUser.save();
+    console.log('✅ User created successfully:', newUser.email);
 
     // Generate JWT token
     const token = generateToken({
@@ -49,6 +56,7 @@ router.post('/auth/register', async (req: Request, res: Response) => {
       email: newUser.email,
     });
 
+    console.log('✅ Token generated, sending response');
     return res.status(201).json({
       success: true,
       token,
@@ -59,30 +67,35 @@ router.post('/auth/register', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('Error during registration:', error);
+    console.error('❌ Error during registration:', error);
     return res.status(500).json({ error: 'Something went wrong, please try again' });
   }
 });
 
 // POST /api/auth/login - Login existing user
 router.post('/auth/login', async (req: Request, res: Response) => {
+  console.log('🔵 Login attempt:', { email: req.body.email });
+
   try {
     const { email, password } = req.body;
 
     // Validate required fields
     if (!email || !password) {
+      console.log('❌ Missing email or password');
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
     // Find user by email
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
+      console.log('❌ User not found:', email);
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      console.log('❌ Invalid password for user:', email);
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
@@ -92,6 +105,7 @@ router.post('/auth/login', async (req: Request, res: Response) => {
       email: user.email,
     });
 
+    console.log('✅ Login successful:', user.email);
     return res.status(200).json({
       success: true,
       token,
@@ -102,7 +116,7 @@ router.post('/auth/login', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('Error during login:', error);
+    console.error('❌ Error during login:', error);
     return res.status(500).json({ error: 'Something went wrong, please try again' });
   }
 });
