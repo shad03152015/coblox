@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import axios from "axios";
 
 export default function Login() {
   const [loginEmail, setLoginEmail] = useState("");
@@ -9,21 +12,89 @@ export default function Login() {
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [, setLocation] = useLocation();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login attempt:", { email: loginEmail, password: loginPassword });
-    // TODO: Implement login logic
-  };
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (registerPassword !== registerConfirmPassword) {
-      alert("Passwords do not match");
+    if (!loginEmail || !loginPassword) {
+      toast.error("Please enter email and password");
       return;
     }
-    console.log("Register attempt:", { email: registerEmail, password: registerPassword });
-    // TODO: Implement register logic
+
+    setIsLoggingIn(true);
+
+    try {
+      const response = await axios.post("/api/auth/login", {
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      if (response.data.success) {
+        // Store token in localStorage
+        localStorage.setItem("token", response.data.token);
+
+        toast.success("Login successful!");
+
+        // Redirect based on whether user has character
+        if (response.data.user.characterName) {
+          setLocation("/home");
+        } else {
+          setLocation("/character-create");
+        }
+      }
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("Something went wrong, please try again");
+      }
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!registerEmail || !registerPassword || !registerConfirmPassword) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (registerPassword !== registerConfirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    setIsRegistering(true);
+
+    try {
+      const response = await axios.post("/api/auth/register", {
+        email: registerEmail,
+        password: registerPassword,
+      });
+
+      if (response.data.success) {
+        // Store token in localStorage
+        localStorage.setItem("token", response.data.token);
+
+        toast.success("Registration successful!");
+
+        // New users don't have character, redirect to character creation
+        setLocation("/character-create");
+      }
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("Something went wrong, please try again");
+      }
+    } finally {
+      setIsRegistering(false);
+    }
   };
 
   return (
@@ -127,6 +198,7 @@ export default function Login() {
                     placeholder="Enter your username or email"
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
+                    disabled={isLoggingIn}
                     className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                   />
                 </div>
@@ -140,6 +212,7 @@ export default function Login() {
                     placeholder="Enter your password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
+                    disabled={isLoggingIn}
                     className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                   />
                 </div>
@@ -152,9 +225,10 @@ export default function Login() {
 
                 <Button
                   type="submit"
+                  disabled={isLoggingIn}
                   className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-2 rounded-lg transition-all duration-200 neon-glow-cyan"
                 >
-                  Login
+                  {isLoggingIn ? "Logging in..." : "Login"}
                 </Button>
               </form>
             </TabsContent>
@@ -171,6 +245,7 @@ export default function Login() {
                     placeholder="Enter your email"
                     value={registerEmail}
                     onChange={(e) => setRegisterEmail(e.target.value)}
+                    disabled={isRegistering}
                     className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                   />
                 </div>
@@ -184,6 +259,7 @@ export default function Login() {
                     placeholder="Create a password"
                     value={registerPassword}
                     onChange={(e) => setRegisterPassword(e.target.value)}
+                    disabled={isRegistering}
                     className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                   />
                 </div>
@@ -197,15 +273,17 @@ export default function Login() {
                     placeholder="Confirm your password"
                     value={registerConfirmPassword}
                     onChange={(e) => setRegisterConfirmPassword(e.target.value)}
+                    disabled={isRegistering}
                     className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                   />
                 </div>
 
                 <Button
                   type="submit"
+                  disabled={isRegistering}
                   className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-2 rounded-lg transition-all duration-200 neon-glow-cyan"
                 >
-                  Register
+                  {isRegistering ? "Creating account..." : "Register"}
                 </Button>
               </form>
             </TabsContent>
@@ -224,4 +302,3 @@ export default function Login() {
     </div>
   );
 }
-

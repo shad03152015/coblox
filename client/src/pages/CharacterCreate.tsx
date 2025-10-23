@@ -43,12 +43,28 @@ export default function CharacterCreate() {
       return;
     }
 
+    // Get token from localStorage
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You must be logged in to create a character");
+      setLocation("/");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post("/api/character", {
-        characterName: characterName.trim(),
-      });
+      const response = await axios.post(
+        "/api/character",
+        {
+          characterName: characterName.trim(),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.data.success) {
         toast.success("Character created successfully!");
