@@ -204,8 +204,8 @@ export default function NeonCity() {
               endRound(true);
             }
             
-            // Update player
-            player.update(dt, buildings, camera);
+            // Update player (no camera parameter needed now)
+            player.update(dt, buildings);
 
             // Update hunter with physics parameters
             const caught = hunter.update(
@@ -225,22 +225,32 @@ export default function NeonCity() {
             // Update distance display
             setDistanceTraveled(player.distanceTraveled);
 
-            // Update camera to follow player (third-person)
+            // Intelligent third-person camera positioning
             const playerPos = player.getPosition();
-            const cameraOffset = new THREE.Vector3(0, 8, 12);
             
-            // Rotate offset based on player direction
-            const rotationMatrix = new THREE.Matrix4().makeRotationY(player.mesh.rotation.y);
-            cameraOffset.applyMatrix4(rotationMatrix);
+            // Camera offset: behind and above the player
+            const cameraDistance = 12; // Distance behind player
+            const cameraHeight = 8;    // Height above player
             
-            const targetCameraPos = playerPos.clone().add(cameraOffset);
+            // Calculate camera position based on player's facing direction
+            const playerRotation = player.mesh.rotation.y;
+            const cameraOffsetX = Math.sin(playerRotation) * cameraDistance;
+            const cameraOffsetZ = Math.cos(playerRotation) * cameraDistance;
             
-            // Smooth camera follow
-            camera.position.lerp(targetCameraPos, 0.1);
+            // Target camera position (behind player)
+            const targetCameraPos = new THREE.Vector3(
+              playerPos.x + cameraOffsetX,
+              playerPos.y + cameraHeight,
+              playerPos.z + cameraOffsetZ
+            );
             
-            // Look at player
+            // Smooth camera follow with physics-based lerp
+            const lerpFactor = 1 - Math.pow(0.001, dt); // Frame-rate independent lerp
+            camera.position.lerp(targetCameraPos, lerpFactor);
+            
+            // Camera looks at point slightly ahead and above player
             const lookAtTarget = playerPos.clone();
-            lookAtTarget.y += 1;
+            lookAtTarget.y += 1.5; // Look at upper body/head level
             camera.lookAt(lookAtTarget);
           }
 

@@ -13,6 +13,7 @@ export class PlayerController {
   private moveSpeed: number = 5;
   private runSpeed: number = 10;
   private currentSpeed: number = 5;
+  private rotationSpeed: number = 3; // Rotation speed in radians per second
 
   // Key states
   private keys: { [key: string]: boolean } = {
@@ -151,33 +152,30 @@ export class PlayerController {
   /**
    * Update player position and state
    */
-  update(delta: number, buildings: THREE.Mesh[], camera: THREE.Camera): void {
+  update(delta: number, buildings: THREE.Mesh[]): void {
     if (!this.isAlive) return;
 
-    // Reset direction
-    this.direction.set(0, 0, 0);
-
-    // Get camera direction (for relative movement)
-    const cameraDirection = new THREE.Vector3();
-    camera.getWorldDirection(cameraDirection);
-    cameraDirection.y = 0;
-    cameraDirection.normalize();
-
-    const cameraRight = new THREE.Vector3();
-    cameraRight.crossVectors(cameraDirection, new THREE.Vector3(0, 1, 0));
-
-    // Calculate movement direction based on keys
-    if (this.keys.forward) {
-      this.direction.add(cameraDirection);
-    }
-    if (this.keys.backward) {
-      this.direction.sub(cameraDirection);
-    }
+    // Handle rotation (A/D keys)
     if (this.keys.left) {
-      this.direction.sub(cameraRight);
+      this.mesh.rotation.y += this.rotationSpeed * delta;
     }
     if (this.keys.right) {
-      this.direction.add(cameraRight);
+      this.mesh.rotation.y -= this.rotationSpeed * delta;
+    }
+
+    // Calculate movement direction based on character facing
+    this.direction.set(0, 0, 0);
+    
+    // Get character's forward direction
+    const forward = new THREE.Vector3(0, 0, -1);
+    forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.mesh.rotation.y);
+
+    // W/S keys for forward/backward movement
+    if (this.keys.forward) {
+      this.direction.add(forward);
+    }
+    if (this.keys.backward) {
+      this.direction.sub(forward);
     }
 
     // Normalize direction
@@ -199,12 +197,6 @@ export class PlayerController {
     if (!this.checkCollision(newPosition, buildings)) {
       this.position.copy(newPosition);
       this.mesh.position.copy(this.position);
-
-      // Rotate player to face movement direction
-      if (this.direction.length() > 0) {
-        const angle = Math.atan2(this.direction.x, this.direction.z);
-        this.mesh.rotation.y = angle;
-      }
     }
 
     // Update distance traveled
