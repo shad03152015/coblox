@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation, useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import SurvivalIsland from "./worlds/SurvivalIsland";
 
 export default function WorldView() {
   const [, setLocation] = useLocation();
@@ -17,6 +18,12 @@ export default function WorldView() {
 
   const worldId = params?.worldId || "unknown";
 
+  // Render Survival Island game if worldId matches
+  if (worldId === "survival-island") {
+    return <SurvivalIsland />;
+  }
+
+  // Default placeholder for other worlds
   return (
     <div className="min-h-screen w-full bg-[#0a0e27] relative overflow-hidden">
       {/* Gradient background */}
