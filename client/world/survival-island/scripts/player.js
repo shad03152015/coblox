@@ -79,7 +79,7 @@ export class Player {
     // Add event listeners for keyboard/mouse events
     document.addEventListener('keyup', this.onKeyUp.bind(this));
     document.addEventListener('keydown', this.onKeyDown.bind(this));
-    document.addEventListener('mousedown', this.onMouseDown.bind(this));
+    document.addEventListener('mousemove', this.onMouseDown.bind(this));
   }
 
   onCameraLock() {
@@ -87,7 +87,9 @@ export class Player {
   }
 
   onCameraUnlock() {
-    if (!this.debugCamera) {
+    // Don't show overlay on ESC press - player stays in game
+    // Only show overlay when F10 debug camera is activated
+    if (this.debugCamera) {
       document.getElementById('overlay').style.visibility = 'visible';
     }
   }
@@ -245,11 +247,15 @@ export class Player {
       case 'Digit6':
       case 'Digit7':
       case 'Digit8':
+      case 'Digit9':
         // Update the selected toolbar icon
         document.getElementById(`toolbar-${this.activeBlockId}`)?.classList.remove('selected');
-        document.getElementById(`toolbar-${event.key}`)?.classList.add('selected');
+        
+        // Digit9 selects the pickaxe (toolbar-0)
+        const selectedId = event.key === '9' ? 0 : Number(event.key);
+        document.getElementById(`toolbar-${selectedId}`)?.classList.add('selected');
 
-        this.activeBlockId = Number(event.key);
+        this.activeBlockId = selectedId;
 
         // Update the pickaxe visibility
         this.tool.container.visible = (this.activeBlockId === 0);
@@ -314,7 +320,7 @@ export class Player {
   }
 
   /**
-   * Event handler for 'mousedown'' event
+   * Event handler for 'mousemove'' event
    * @param {MouseEvent} event 
    */
   onMouseDown(event) {
