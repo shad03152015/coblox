@@ -9,6 +9,10 @@ import Login from "./pages/Login";
 import CharacterCreate from "./pages/CharacterCreate";
 import AvatarCustomize from "./pages/AvatarCustomize";
 import Profile from "./pages/Profile";
+import WorldView from "./pages/WorldView";
+import CreateWorld from "./pages/CreateWorld";
+import Settings from "./pages/Settings";
+import MyWorlds from "./pages/MyWorlds";
 
 function Router() {
   return (
@@ -18,6 +22,10 @@ function Router() {
       <Route path={"/avatar-customize"} component={AvatarCustomize} />
       <Route path={"/home"} component={Home} />
       <Route path={"/profile"} component={Profile} />
+      <Route path={"/world/:worldId"} component={WorldView} />
+      <Route path={"/create-world"} component={CreateWorld} />
+      <Route path={"/settings"} component={Settings} />
+      <Route path={"/my-worlds"} component={MyWorlds} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
