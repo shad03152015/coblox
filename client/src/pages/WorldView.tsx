@@ -3,6 +3,7 @@ import { useLocation, useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SurvivalIsland from "./worlds/SurvivalIsland";
+import NeonCity from "./worlds/NeonCity";
 
 export default function WorldView() {
   const [, setLocation] = useLocation();
@@ -21,6 +22,11 @@ export default function WorldView() {
   // Render Survival Island game if worldId matches
   if (worldId === "survival-island") {
     return <SurvivalIsland />;
+  }
+
+  // Render Neon City if worldId matches
+  if (worldId === "neon-city") {
+    return <NeonCity />;
   }
 
   // Default placeholder for other worlds
