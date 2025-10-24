@@ -1,9 +1,8 @@
 import * as THREE from 'three';
-import minecraftData from 'minecraft-data';
-// @ts-ignore - prismarine packages don't have proper TS types
-import { parseNbt } from 'prismarine-nbt';
-// @ts-ignore
-import { Chunk } from 'prismarine-chunk';
+
+// Dynamic imports for prismarine packages to avoid build-time bundling issues
+let minecraftData: any = null;
+let parseNbt: any = null;
 
 /**
  * Minecraft World Loader for Neon City
@@ -15,14 +14,39 @@ export class MinecraftWorldLoader {
   private loadedChunks: Map<string, THREE.Group>;
   private chunkLoader: any;
   private worldPath: string;
+  private initialized: boolean = false;
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
-    this.mcData = minecraftData('1.16.5');
     this.loadedChunks = new Map();
     this.worldPath = '/world/neon-city';
 
     console.log('🌍 Minecraft World Loader initialized for version 1.16.5');
+  }
+
+  /**
+   * Initialize dynamic imports
+   */
+  private async initialize(): Promise<void> {
+    if (this.initialized) return;
+
+    try {
+      // Dynamic import to avoid bundling issues
+      const [mcDataModule, nbtModule] = await Promise.all([
+        import('minecraft-data'),
+        import('prismarine-nbt'),
+      ]);
+
+      minecraftData = mcDataModule.default || mcDataModule;
+      parseNbt = nbtModule.parseNbt || nbtModule.default?.parseNbt;
+
+      this.mcData = minecraftData('1.16.5');
+      this.initialized = true;
+      console.log('✅ Minecraft data loaded');
+    } catch (error) {
+      console.error('❌ Failed to load Minecraft data:', error);
+      throw new Error('Failed to initialize Minecraft world loader');
+    }
   }
 
   /**
@@ -46,6 +70,11 @@ export class MinecraftWorldLoader {
    * Load a single chunk from the world
    */
   async loadChunk(chunkX: number, chunkZ: number): Promise<void> {
+    // Initialize if not already done
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
     const chunkKey = this.getChunkKey(chunkX, chunkZ);
 
     // Skip if already loaded
@@ -357,6 +386,11 @@ export class MinecraftWorldLoader {
    * Load multiple chunks around a center point
    */
   async loadChunksAround(centerX: number, centerZ: number, radius: number = 2): Promise<void> {
+    // Initialize if not already done
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
     const chunkX = Math.floor(centerX / 16);
     const chunkZ = Math.floor(centerZ / 16);
 
