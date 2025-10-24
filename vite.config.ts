@@ -22,7 +22,26 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      // Exclude large world files from bundling
+      external: [
+        /\/world\/.*\.mca$/,
+        /\/world\/.*\.dat$/,
+      ],
+    },
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 2000,
   },
+  optimizeDeps: {
+    // Exclude prismarine packages from pre-bundling to avoid eval issues and memory problems
+    exclude: [
+      'prismarine-nbt',
+      'prismarine-chunk',
+      'prismarine-viewer',
+      'minecraft-data',
+    ],
+  },
+  publicDir: path.resolve(import.meta.dirname, "client/public"),
   server: {
     port: 3000,
     strictPort: false, // Will find next available port if 3000 is busy
@@ -39,6 +58,11 @@ export default defineConfig({
     fs: {
       strict: true,
       deny: ["**/.*"],
+      // Allow serving world files from client/world directory
+      allow: [
+        path.resolve(import.meta.dirname, "client"),
+        path.resolve(import.meta.dirname, "node_modules"),
+      ],
     },
     proxy: {
       '/socket.io': {
