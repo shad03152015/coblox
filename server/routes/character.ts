@@ -78,22 +78,22 @@ router.patch('/character/avatar', authMiddleware, async (req: Request, res: Resp
       return res.status(400).json({ error: 'Avatar appearance is required' });
     }
 
-    // Validate structure - must have shirt, pants, shoes
+    // Validate clothing (required)
     if (!avatarAppearance.shirt || !avatarAppearance.pants || !avatarAppearance.shoes) {
       return res.status(400).json({ error: 'Avatar appearance must include shirt, pants, and shoes' });
     }
 
-    // Validate each item has id and color
-    const items = [avatarAppearance.shirt, avatarAppearance.pants, avatarAppearance.shoes];
-    for (const item of items) {
+    // Validate each clothing item has id and color
+    const clothingItems = [avatarAppearance.shirt, avatarAppearance.pants, avatarAppearance.shoes];
+    for (const item of clothingItems) {
       if (!item.id || !item.color) {
         return res.status(400).json({ error: 'Each clothing item must have an id and color' });
       }
     }
 
-    // Validate colors
+    // Validate colors for clothing
     const validColors = ['red', 'green', 'blue', 'pink', 'purple', 'cyan', 'black'];
-    for (const item of items) {
+    for (const item of clothingItems) {
       const normalizedColor = item.color.toLowerCase();
       if (!validColors.includes(normalizedColor)) {
         return res.status(400).json({ error: `Invalid color: ${item.color}. Must be one of: ${validColors.join(', ')}` });
@@ -117,6 +117,69 @@ router.patch('/character/avatar', authMiddleware, async (req: Request, res: Resp
       return res.status(400).json({ error: `Invalid shoes id: ${avatarAppearance.shoes.id}` });
     }
 
+    // Prepare avatar data
+    const avatarData: any = {
+      shirt: avatarAppearance.shirt,
+      pants: avatarAppearance.pants,
+      shoes: avatarAppearance.shoes,
+    };
+
+    // Validate body (optional)
+    if (avatarAppearance.body) {
+      const validBodyTypes = ['slim', 'athletic', 'average', 'muscular'];
+      const validSkinTones = ['light', 'fair', 'medium', 'tan', 'brown', 'dark'];
+
+      if (!avatarAppearance.body.type || !avatarAppearance.body.skinTone) {
+        return res.status(400).json({ error: 'Body must have type and skinTone' });
+      }
+
+      if (!validBodyTypes.includes(avatarAppearance.body.type)) {
+        return res.status(400).json({ error: `Invalid body type: ${avatarAppearance.body.type}` });
+      }
+
+      if (!validSkinTones.includes(avatarAppearance.body.skinTone)) {
+        return res.status(400).json({ error: `Invalid skin tone: ${avatarAppearance.body.skinTone}` });
+      }
+
+      avatarData.body = avatarAppearance.body;
+    }
+
+    // Validate hair (optional)
+    if (avatarAppearance.hair) {
+      const validHairBaseStyles = ['short-messy', 'long-wavy', 'slicked-back', 'top-bun', 'spiky', 'ponytail'];
+      const validHairElements = ['bangs', 'braids', 'clips', 'hairband', 'feathers'];
+
+      if (!avatarAppearance.hair.baseStyle || !avatarAppearance.hair.color) {
+        return res.status(400).json({ error: 'Hair must have baseStyle and color' });
+      }
+
+      if (!validHairBaseStyles.includes(avatarAppearance.hair.baseStyle)) {
+        return res.status(400).json({ error: `Invalid hair base style: ${avatarAppearance.hair.baseStyle}` });
+      }
+
+      const normalizedHairColor = avatarAppearance.hair.color.toLowerCase();
+      if (!validColors.includes(normalizedHairColor)) {
+        return res.status(400).json({ error: `Invalid hair color: ${avatarAppearance.hair.color}` });
+      }
+
+      // Validate hair elements if provided
+      if (avatarAppearance.hair.elements && Array.isArray(avatarAppearance.hair.elements)) {
+        for (const element of avatarAppearance.hair.elements) {
+          if (!validHairElements.includes(element)) {
+            return res.status(400).json({ error: `Invalid hair element: ${element}` });
+          }
+        }
+      } else {
+        avatarAppearance.hair.elements = [];
+      }
+
+      avatarData.hair = {
+        baseStyle: avatarAppearance.hair.baseStyle,
+        elements: avatarAppearance.hair.elements,
+        color: normalizedHairColor,
+      };
+    }
+
     // Get authenticated user
     const userId = req.user!.userId;
     const user = await User.findById(userId);
@@ -126,11 +189,7 @@ router.patch('/character/avatar', authMiddleware, async (req: Request, res: Resp
     }
 
     // Update user's avatar appearance
-    user.avatarAppearance = {
-      shirt: avatarAppearance.shirt,
-      pants: avatarAppearance.pants,
-      shoes: avatarAppearance.shoes,
-    };
+    user.avatarAppearance = avatarData;
     await user.save();
 
     return res.status(200).json({
