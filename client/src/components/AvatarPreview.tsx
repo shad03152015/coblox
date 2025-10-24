@@ -1356,6 +1356,9 @@ export function AvatarPreview({ shirt, pants, shoes, body, hair, accessories }: 
     <div className="flex items-center justify-center w-full h-full">
       {/* Simple 2D character illustration */}
       <div className="relative" style={{ width: "200px", height: "280px" }}>
+        {/* Wings (rendered behind everything) */}
+        {renderWings()}
+        
         {/* Hair (rendered behind head) */}
         {renderHair()}
         
@@ -1373,6 +1376,9 @@ export function AvatarPreview({ shirt, pants, shoes, body, hair, accessories }: 
         
         {/* Hair elements (rendered on top of hair) */}
         {renderHairElements()}
+        
+        {/* Hat (rendered on top of head/hair) */}
+        {renderHat()}
 
         {/* Eyes */}
         <div
@@ -1397,6 +1403,9 @@ export function AvatarPreview({ shirt, pants, shoes, body, hair, accessories }: 
             borderRadius: "2px",
           }}
         />
+        
+        {/* Glasses (rendered on face) */}
+        {renderGlasses()}
 
         {/* Neck */}
         <div
@@ -1409,6 +1418,9 @@ export function AvatarPreview({ shirt, pants, shoes, body, hair, accessories }: 
             backgroundColor: skinColor,
           }}
         />
+        
+        {/* Jewelry (rendered on neck) */}
+        {renderJewelry()}
 
         {/* Torso (Shirt) */}
         <div
