@@ -5,7 +5,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { io, Socket } from "socket.io-client";
 import { MultiplayerManager } from "../../worlds/neon-city/multiplayerManager";
-import { ProceduralCityGenerator } from "../../worlds/neon-city/proceduralCityGenerator";
+import { MinecraftWorldLoader } from "../../../world/neon-city/scripts/minecraftWorldLoader";
+
 
 export default function NeonCity() {
   const [, setLocation] = useLocation();
@@ -21,8 +22,8 @@ export default function NeonCity() {
     controls?: OrbitControls;
     socket?: Socket;
     multiplayerManager?: MultiplayerManager;
-    cityGenerator?: ProceduralCityGenerator;
-  }>({});
+    worldLoader?: MinecraftWorldLoader;
+    }>({});
 
   useEffect(() => {
     // Check authentication
@@ -90,12 +91,14 @@ export default function NeonCity() {
         const multiplayerManager = new MultiplayerManager(scene);
         gameRef.current.multiplayerManager = multiplayerManager;
 
-        // Initialize Procedural City Generator
-        const cityGenerator = new ProceduralCityGenerator(scene);
-        gameRef.current.cityGenerator = cityGenerator;
-        
-        // Generate the neon city
-        cityGenerator.generate();
+        const worldLoader = new MinecraftWorldLoader(scene);
+        gameRef.current.worldLoader = worldLoader;
+
+        // Load chunks around spawn point (0, 0)
+        console.log('🌍 Loading Minecraft world chunks...');
+        await worldLoader.loadChunksAround(0, 0, 3); // Load 7x7 chunks (49 chunks)
+        console.log(`✅ Loaded ${worldLoader.getLoadedChunkCount()} chunks`);
+
         console.log('🌆 Neon City generated');
 
         // Initialize Socket.io connection
@@ -275,16 +278,17 @@ export default function NeonCity() {
         gameRef.current.socket.disconnect();
       }
 
+      if (gameRef.current.worldLoader) {
+        gameRef.current.worldLoader.clearAll();
+      }
+    
+
       // Clear multiplayer manager
       if (gameRef.current.multiplayerManager) {
         gameRef.current.multiplayerManager.clearAllPlayers();
       }
 
-      // Clear city generator
-      if (gameRef.current.cityGenerator) {
-        gameRef.current.cityGenerator.clear();
-      }
-
+  
       // Cancel animation frame
       if (gameRef.current.animationId) {
         cancelAnimationFrame(gameRef.current.animationId);
@@ -302,6 +306,7 @@ export default function NeonCity() {
       }
     };
   }, [setLocation]);
+
 
   return (
     <div

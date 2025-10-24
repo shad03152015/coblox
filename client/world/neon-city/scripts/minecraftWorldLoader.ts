@@ -1,19 +1,18 @@
 import * as THREE from 'three';
 import minecraftData from 'minecraft-data';
+import * as pako from 'pako';
 // @ts-ignore - prismarine packages don't have proper TS types
 import { parseNbt } from 'prismarine-nbt';
-// @ts-ignore
-import { Chunk } from 'prismarine-chunk';
 
 /**
  * Minecraft World Loader for Neon City
  * Loads and renders Minecraft 1.16.5 world chunks
+ * Browser-compatible version using pako for decompression
  */
 export class MinecraftWorldLoader {
   private scene: THREE.Scene;
   private mcData: any;
   private loadedChunks: Map<string, THREE.Group>;
-  private chunkLoader: any;
   private worldPath: string;
 
   constructor(scene: THREE.Scene) {
@@ -120,16 +119,16 @@ export class MinecraftWorldLoader {
       // Read chunk data
       const chunkData = regionBuffer.slice(byteOffset + 5, byteOffset + 4 + length);
 
-      // Parse NBT data
+      // Parse NBT data - use pako for browser-compatible decompression
       let decompressed: Buffer;
       if (compressionType === 2) {
-        // Zlib compression
-        const zlib = await import('zlib');
-        decompressed = zlib.inflateSync(chunkData);
+        // Zlib compression - use pako
+        const inflated = pako.inflate(chunkData);
+        decompressed = Buffer.from(inflated);
       } else if (compressionType === 1) {
-        // Gzip compression
-        const zlib = await import('zlib');
-        decompressed = zlib.gunzipSync(chunkData);
+        // Gzip compression - use pako
+        const ungzipped = pako.ungzip(chunkData);
+        decompressed = Buffer.from(ungzipped);
       } else {
         decompressed = chunkData;
       }
