@@ -11,6 +11,12 @@ interface AvatarAppearance {
   shoes: { id: string; color: string };
   body?: { type: string; skinTone: string };
   hair?: { baseStyle: string; elements: string[]; color: string };
+  accessories?: {
+    hat?: { id: string; color: string };
+    glasses?: { id: string; color: string };
+    jewelry?: { id: string; color: string };
+    wings?: { id: string; color: string };
+  };
 }
 
 interface UserProfile {
