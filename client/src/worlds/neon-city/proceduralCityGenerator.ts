@@ -7,6 +7,7 @@ import * as THREE from 'three';
 export class ProceduralCityGenerator {
   private scene: THREE.Scene;
   private cityGroup: THREE.Group;
+  private buildings: THREE.Mesh[] = []; // Store building meshes for collision
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
@@ -22,6 +23,9 @@ export class ProceduralCityGenerator {
    */
   generate(): void {
     console.log('🏗️ Generating Neon City...');
+
+    // Reset buildings array
+    this.buildings = [];
 
     // Create ground
     this.createGround();
@@ -106,6 +110,9 @@ export class ProceduralCityGenerator {
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     building.add(mesh);
+
+    // Store main mesh for collision detection
+    this.buildings.push(mesh);
 
     // Add neon accents (vertical strips)
     const accentCount = Math.floor(Math.random() * 3) + 2;
@@ -214,6 +221,13 @@ export class ProceduralCityGenerator {
    */
   private randomHeight(min: number, max: number): number {
     return Math.random() * (max - min) + min;
+  }
+
+  /**
+   * Get buildings array for collision detection
+   */
+  getBuildings(): THREE.Mesh[] {
+    return this.buildings;
   }
 
   /**
