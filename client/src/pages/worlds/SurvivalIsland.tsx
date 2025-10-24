@@ -66,42 +66,42 @@ export default function SurvivalIsland() {
         // Import game modules dynamically
         console.log('📦 Loading game modules...');
         const { World } = await import(
-          "../../../world/survival-island/scripts/world.js"
+          "../../worlds/survival-island/scripts/world.js"
         ).catch(err => {
           console.error('❌ Failed to load World module:', err);
           throw new Error('Failed to load World module');
         });
         
         const { Player } = await import(
-          "../../../world/survival-island/scripts/player.js"
+          "../../worlds/survival-island/scripts/player.js"
         ).catch(err => {
           console.error('❌ Failed to load Player module:', err);
           throw new Error('Failed to load Player module');
         });
         
         const { Physics } = await import(
-          "../../../world/survival-island/scripts/physics.js"
+          "../../worlds/survival-island/scripts/physics.js"
         ).catch(err => {
           console.error('❌ Failed to load Physics module:', err);
           throw new Error('Failed to load Physics module');
         });
         
         const { setupUI } = await import(
-          "../../../world/survival-island/scripts/ui.js"
+          "../../worlds/survival-island/scripts/ui.js"
         ).catch(err => {
           console.error('❌ Failed to load UI module:', err);
           throw new Error('Failed to load UI module');
         });
         
         const { ModelLoader } = await import(
-          "../../../world/survival-island/scripts/modelLoader.js"
+          "../../worlds/survival-island/scripts/modelLoader.js"
         ).catch(err => {
           console.error('❌ Failed to load ModelLoader module:', err);
           throw new Error('Failed to load ModelLoader module');
         });
         
         const { MultiplayerManager } = await import(
-          "../../../world/survival-island/scripts/multiplayerManager.js"
+          "../../worlds/survival-island/scripts/multiplayerManager.js"
         ).catch(err => {
           console.error('❌ Failed to load MultiplayerManager module:', err);
           throw new Error('Failed to load MultiplayerManager module');
