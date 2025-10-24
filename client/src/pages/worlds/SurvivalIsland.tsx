@@ -5,6 +5,17 @@ import * as THREE from "three";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
+// Import textures
+import grassTexture from "../../../world/survival-island/public/textures/grass.png";
+import dirtTexture from "../../../world/survival-island/public/textures/dirt.png";
+import stoneTexture from "../../../world/survival-island/public/textures/stone.png";
+import coalOreTexture from "../../../world/survival-island/public/textures/coal_ore.png";
+import ironOreTexture from "../../../world/survival-island/public/textures/iron_ore.png";
+import treeTopTexture from "../../../world/survival-island/public/textures/tree_top.png";
+import leavesTexture from "../../../world/survival-island/public/textures/leaves.png";
+import sandTexture from "../../../world/survival-island/public/textures/sand.png";
+import pickaxeTexture from "../../../world/survival-island/public/textures/pickaxe.png";
+
 // Import game modules from survival-island
 // Note: These will need to be converted to TypeScript or imported as JS modules
 // For now, we'll create a wrapper that initializes the game
@@ -251,63 +262,63 @@ export default function SurvivalIsland() {
           <img
             className="toolbar-icon"
             id="toolbar-1"
-            src="/client/world/survival-island/public/textures/grass.png"
+            src={grassTexture}
             alt="Grass"
             style={{ width: "64px", height: "64px", outline: "4px solid rgb(58, 58, 58)" }}
           />
           <img
             className="toolbar-icon"
             id="toolbar-2"
-            src="/client/world/survival-island/public/textures/dirt.png"
+            src={dirtTexture}
             alt="Dirt"
             style={{ width: "64px", height: "64px", outline: "4px solid rgb(58, 58, 58)" }}
           />
           <img
             className="toolbar-icon"
             id="toolbar-3"
-            src="/client/world/survival-island/public/textures/stone.png"
+            src={stoneTexture}
             alt="Stone"
             style={{ width: "64px", height: "64px", outline: "4px solid rgb(58, 58, 58)" }}
           />
           <img
             className="toolbar-icon"
             id="toolbar-4"
-            src="/client/world/survival-island/public/textures/coal_ore.png"
+            src={coalOreTexture}
             alt="Coal Ore"
             style={{ width: "64px", height: "64px", outline: "4px solid rgb(58, 58, 58)" }}
           />
           <img
             className="toolbar-icon"
             id="toolbar-5"
-            src="/client/world/survival-island/public/textures/iron_ore.png"
+            src={ironOreTexture}
             alt="Iron Ore"
             style={{ width: "64px", height: "64px", outline: "4px solid rgb(58, 58, 58)" }}
           />
           <img
             className="toolbar-icon"
             id="toolbar-6"
-            src="/client/world/survival-island/public/textures/tree_top.png"
+            src={treeTopTexture}
             alt="Tree"
             style={{ width: "64px", height: "64px", outline: "4px solid rgb(58, 58, 58)" }}
           />
           <img
             className="toolbar-icon"
             id="toolbar-7"
-            src="/client/world/survival-island/public/textures/leaves.png"
+            src={leavesTexture}
             alt="Leaves"
             style={{ width: "64px", height: "64px", outline: "4px solid rgb(58, 58, 58)" }}
           />
           <img
             className="toolbar-icon"
             id="toolbar-8"
-            src="/client/world/survival-island/public/textures/sand.png"
+            src={sandTexture}
             alt="Sand"
             style={{ width: "64px", height: "64px", outline: "4px solid rgb(58, 58, 58)" }}
           />
           <img
             className="toolbar-icon selected"
             id="toolbar-0"
-            src="/client/world/survival-island/public/textures/pickaxe.png"
+            src={pickaxeTexture}
             alt="Pickaxe"
             style={{ width: "64px", height: "64px", outline: "4px solid white" }}
           />
