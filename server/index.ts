@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.js";
 import characterRoutes from "./routes/character.js";
 import notificationRoutes from "./routes/notification.js";
 import friendsRoutes from "./routes/friends.js";
+import { initializeMultiplayer } from "./services/multiplayer.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,9 @@ async function startServer() {
 
   // Connect to MongoDB
   await connectDB();
+
+  // Initialize multiplayer service with Socket.io
+  initializeMultiplayer(server);
 
   // Parse JSON request bodies
   app.use(express.json());
