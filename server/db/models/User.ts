@@ -23,6 +23,14 @@ const userSchema = new mongoose.Schema({
     default: null,
     required: false,
   },
+  friends: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    default: []
+  },
+  currentWorld: {
+    type: String,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now,
