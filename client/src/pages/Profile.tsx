@@ -155,6 +155,7 @@ export default function Profile() {
                     shoes={avatarAppearance.shoes}
                     body={avatarAppearance.body}
                     hair={avatarAppearance.hair}
+                    accessories={avatarAppearance.accessories}
                   />
                 </div>
               </div>
@@ -228,6 +229,38 @@ export default function Profile() {
                           {avatarAppearance.pants.id.replace("-", " ")} ({avatarAppearance.pants.color})
                         </p>
                       </div>
+                      {avatarAppearance.accessories?.hat && (
+                        <div>
+                          <label className="text-gray-400">Hat</label>
+                          <p className="text-white capitalize">
+                            {avatarAppearance.accessories.hat.id.replace("-", " ")} ({avatarAppearance.accessories.hat.color})
+                          </p>
+                        </div>
+                      )}
+                      {avatarAppearance.accessories?.glasses && (
+                        <div>
+                          <label className="text-gray-400">Glasses</label>
+                          <p className="text-white capitalize">
+                            {avatarAppearance.accessories.glasses.id.replace("-", " ")} ({avatarAppearance.accessories.glasses.color})
+                          </p>
+                        </div>
+                      )}
+                      {avatarAppearance.accessories?.jewelry && (
+                        <div>
+                          <label className="text-gray-400">Jewelry</label>
+                          <p className="text-white capitalize">
+                            {avatarAppearance.accessories.jewelry.id.replace("-", " ")} ({avatarAppearance.accessories.jewelry.color})
+                          </p>
+                        </div>
+                      )}
+                      {avatarAppearance.accessories?.wings && (
+                        <div>
+                          <label className="text-gray-400">Wings</label>
+                          <p className="text-white capitalize">
+                            {avatarAppearance.accessories.wings.id.replace("-", " ")} ({avatarAppearance.accessories.wings.color})
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
