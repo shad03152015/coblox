@@ -42,6 +42,7 @@ export default defineConfig({
     ],
   },
   publicDir: path.resolve(import.meta.dirname, "client/public"),
+  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg', '**/*.ico'],
   server: {
     port: 3000,
     strictPort: false, // Will find next available port if 3000 is busy
@@ -55,6 +56,16 @@ export default defineConfig({
       "localhost",
       "127.0.0.1",
     ],
+    watch: {
+      // Ignore large world files to prevent memory issues
+      ignored: [
+        '**/world/**/*.mca',
+        '**/world/**/*.dat',
+        '**/world/**/*.dat_old',
+        '**/world/**/region/**',
+        '**/neon-city/**',
+      ],
+    },
     fs: {
       strict: true,
       deny: ["**/.*"],
