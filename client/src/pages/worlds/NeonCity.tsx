@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { io, Socket } from "socket.io-client";
 import { MultiplayerManager } from "../../worlds/neon-city/multiplayerManager";
+import { ProceduralCityGenerator } from "../../worlds/neon-city/proceduralCityGenerator";
 
 
 export default function NeonCity() {
@@ -89,25 +90,11 @@ export default function NeonCity() {
         const multiplayerManager = new MultiplayerManager(scene);
         gameRef.current.multiplayerManager = multiplayerManager;
 
-        // DISABLED: Minecraft world loading causes memory overflow
-        // const worldLoader = new MinecraftWorldLoader(scene);
-        // gameRef.current.worldLoader = worldLoader;
-
-        // Add simple ground plane as placeholder
-        console.log('🌍 Creating ground plane...');
-        const groundGeometry = new THREE.PlaneGeometry(200, 200);
-        const groundMaterial = new THREE.MeshLambertMaterial({ 
-          color: 0x2a2a2a,
-          side: THREE.DoubleSide 
-        });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        ground.position.y = 0;
-        ground.receiveShadow = true;
-        scene.add(ground);
-        console.log('✅ Ground plane created');
-
-        console.log('🌆 Neon City generated');
+        // Generate procedural neon city with buildings and lights
+        console.log('🌆 Generating Neon City...');
+        const cityGenerator = new ProceduralCityGenerator(scene);
+        cityGenerator.generate();
+        console.log('✅ Neon City generated');
 
         // Initialize Socket.io connection
         const socket = io(window.location.origin, {
