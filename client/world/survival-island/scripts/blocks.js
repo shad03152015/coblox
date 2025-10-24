@@ -1,5 +1,24 @@
 import * as THREE from 'three';
 
+// Import all textures as ES modules for proper Vite bundling
+import cactusSideImg from '../public/textures/cactus_side.png';
+import cactusTopImg from '../public/textures/cactus_top.png';
+import dirtImg from '../public/textures/dirt.png';
+import grassImg from '../public/textures/grass.png';
+import grassSideImg from '../public/textures/grass_side.png';
+import coalOreImg from '../public/textures/coal_ore.png';
+import ironOreImg from '../public/textures/iron_ore.png';
+import jungleTreeSideImg from '../public/textures/jungle_tree_side.png';
+import jungleTreeTopImg from '../public/textures/jungle_tree_top.png';
+import jungleLeavesImg from '../public/textures/jungle_leaves.png';
+import leavesImg from '../public/textures/leaves.png';
+import treeSideImg from '../public/textures/tree_side.png';
+import treeTopImg from '../public/textures/tree_top.png';
+import sandImg from '../public/textures/sand.png';
+import snowImg from '../public/textures/snow.png';
+import snowSideImg from '../public/textures/snow_side.png';
+import stoneImg from '../public/textures/stone.png';
+
 const textureLoader = new THREE.TextureLoader();
 
 function loadTexture(path) {
@@ -11,23 +30,23 @@ function loadTexture(path) {
 }
 
 const textures = {
-  cactusSide: loadTexture('textures/cactus_side.png'),
-  cactusTop: loadTexture('textures/cactus_top.png'),
-  dirt: loadTexture('textures/dirt.png'),
-  grass: loadTexture('textures/grass.png'),
-  grassSide: loadTexture('textures/grass_side.png'),
-  coalOre: loadTexture('textures/coal_ore.png'),
-  ironOre: loadTexture('textures/iron_ore.png'),
-  jungleTreeSide: loadTexture('textures/jungle_tree_side.png'),
-  jungleTreeTop: loadTexture('textures/jungle_tree_top.png'),
-  jungleLeaves: loadTexture('textures/jungle_leaves.png'),
-  leaves: loadTexture('textures/leaves.png'),
-  treeSide: loadTexture('textures/tree_side.png'),
-  treeTop: loadTexture('textures/tree_top.png'),
-  sand: loadTexture('textures/sand.png'),
-  snow: loadTexture('textures/snow.png'),
-  snowSide: loadTexture('textures/snow_side.png'),
-  stone: loadTexture('textures/stone.png'),
+  cactusSide: loadTexture(cactusSideImg),
+  cactusTop: loadTexture(cactusTopImg),
+  dirt: loadTexture(dirtImg),
+  grass: loadTexture(grassImg),
+  grassSide: loadTexture(grassSideImg),
+  coalOre: loadTexture(coalOreImg),
+  ironOre: loadTexture(ironOreImg),
+  jungleTreeSide: loadTexture(jungleTreeSideImg),
+  jungleTreeTop: loadTexture(jungleTreeTopImg),
+  jungleLeaves: loadTexture(jungleLeavesImg),
+  leaves: loadTexture(leavesImg),
+  treeSide: loadTexture(treeSideImg),
+  treeTop: loadTexture(treeTopImg),
+  sand: loadTexture(sandImg),
+  snow: loadTexture(snowImg),
+  snowSide: loadTexture(snowSideImg),
+  stone: loadTexture(stoneImg),
 };
 
 export const blocks = {
