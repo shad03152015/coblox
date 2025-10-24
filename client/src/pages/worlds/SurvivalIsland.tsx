@@ -35,19 +35,19 @@ export default function SurvivalIsland() {
       try {
         // Import game modules dynamically
         const { World } = await import(
-          "/client/world/survival-island/scripts/world.js"
+          "../../../world/survival-island/scripts/world.js"
         );
         const { Player } = await import(
-          "/client/world/survival-island/scripts/player.js"
+          "../../../world/survival-island/scripts/player.js"
         );
         const { Physics } = await import(
-          "/client/world/survival-island/scripts/physics.js"
+          "../../../world/survival-island/scripts/physics.js"
         );
         const { setupUI } = await import(
-          "/client/world/survival-island/scripts/ui.js"
+          "../../../world/survival-island/scripts/ui.js"
         );
         const { ModelLoader } = await import(
-          "/client/world/survival-island/scripts/modelLoader.js"
+          "../../../world/survival-island/scripts/modelLoader.js"
         );
 
         // Stats setup
