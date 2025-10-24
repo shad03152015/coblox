@@ -180,6 +180,86 @@ router.patch('/character/avatar', authMiddleware, async (req: Request, res: Resp
       };
     }
 
+    // Validate accessories (optional)
+    if (avatarAppearance.accessories) {
+      const validHatIds = ['bunny-ears', 'top-hat', 'baseball-cap', 'beanie', 'crown', 'witch-hat'];
+      const validGlassesIds = ['star-glasses', 'sunglasses', 'round-glasses', 'heart-glasses', 'nerd-glasses', 'cat-eye-glasses'];
+      const validJewelryIds = ['heart-necklace', 'gold-chain', 'pearl-necklace', 'star-pendant', 'gem-necklace', 'bow-tie'];
+      const validWingsIds = ['fairy-wings', 'angel-wings', 'dragon-wings', 'butterfly-wings', 'bat-wings', 'rainbow-wings'];
+      const validAccessoryColors = ['red', 'green', 'blue', 'pink', 'purple', 'cyan', 'black', 'yellow', 'white'];
+
+      const accessories: any = {};
+
+      // Validate hat (optional)
+      if (avatarAppearance.accessories.hat) {
+        const hat = avatarAppearance.accessories.hat;
+        if (!hat.id || !hat.color) {
+          return res.status(400).json({ error: 'Hat must have id and color' });
+        }
+        if (!validHatIds.includes(hat.id)) {
+          return res.status(400).json({ error: `Invalid hat id: ${hat.id}` });
+        }
+        const normalizedHatColor = hat.color.toLowerCase();
+        if (!validAccessoryColors.includes(normalizedHatColor)) {
+          return res.status(400).json({ error: `Invalid hat color: ${hat.color}` });
+        }
+        accessories.hat = { id: hat.id, color: normalizedHatColor };
+      }
+
+      // Validate glasses (optional)
+      if (avatarAppearance.accessories.glasses) {
+        const glasses = avatarAppearance.accessories.glasses;
+        if (!glasses.id || !glasses.color) {
+          return res.status(400).json({ error: 'Glasses must have id and color' });
+        }
+        if (!validGlassesIds.includes(glasses.id)) {
+          return res.status(400).json({ error: `Invalid glasses id: ${glasses.id}` });
+        }
+        const normalizedGlassesColor = glasses.color.toLowerCase();
+        if (!validAccessoryColors.includes(normalizedGlassesColor)) {
+          return res.status(400).json({ error: `Invalid glasses color: ${glasses.color}` });
+        }
+        accessories.glasses = { id: glasses.id, color: normalizedGlassesColor };
+      }
+
+      // Validate jewelry (optional)
+      if (avatarAppearance.accessories.jewelry) {
+        const jewelry = avatarAppearance.accessories.jewelry;
+        if (!jewelry.id || !jewelry.color) {
+          return res.status(400).json({ error: 'Jewelry must have id and color' });
+        }
+        if (!validJewelryIds.includes(jewelry.id)) {
+          return res.status(400).json({ error: `Invalid jewelry id: ${jewelry.id}` });
+        }
+        const normalizedJewelryColor = jewelry.color.toLowerCase();
+        if (!validAccessoryColors.includes(normalizedJewelryColor)) {
+          return res.status(400).json({ error: `Invalid jewelry color: ${jewelry.color}` });
+        }
+        accessories.jewelry = { id: jewelry.id, color: normalizedJewelryColor };
+      }
+
+      // Validate wings (optional)
+      if (avatarAppearance.accessories.wings) {
+        const wings = avatarAppearance.accessories.wings;
+        if (!wings.id || !wings.color) {
+          return res.status(400).json({ error: 'Wings must have id and color' });
+        }
+        if (!validWingsIds.includes(wings.id)) {
+          return res.status(400).json({ error: `Invalid wings id: ${wings.id}` });
+        }
+        const normalizedWingsColor = wings.color.toLowerCase();
+        if (!validAccessoryColors.includes(normalizedWingsColor)) {
+          return res.status(400).json({ error: `Invalid wings color: ${wings.color}` });
+        }
+        accessories.wings = { id: wings.id, color: normalizedWingsColor };
+      }
+
+      // Only add accessories if at least one is present
+      if (Object.keys(accessories).length > 0) {
+        avatarData.accessories = accessories;
+      }
+    }
+
     // Get authenticated user
     const userId = req.user!.userId;
     const user = await User.findById(userId);
