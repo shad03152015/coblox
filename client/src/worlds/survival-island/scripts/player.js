@@ -79,19 +79,17 @@ export class Player {
     // Add event listeners for keyboard/mouse events
     document.addEventListener('keyup', this.onKeyUp.bind(this));
     document.addEventListener('keydown', this.onKeyDown.bind(this));
-    document.addEventListener('mousedown', this.onMouseDown.bind(this));
+    document.addEventListener('mousemove', this.onMouseDown.bind(this));
   }
 
   onCameraLock() {
-    document.getElementById('overlay').style.visibility = 'hidden';
+    // Overlay removed - no action needed
+    console.log('🔒 Controls locked - keyboard input enabled');
   }
 
   onCameraUnlock() {
-    // Don't show overlay on ESC press - player stays in game
-    // Only show overlay when F10 debug camera is activated
-    if (this.debugCamera) {
-      document.getElementById('overlay').style.visibility = 'visible';
-    }
+    // Overlay removed - no action needed
+    console.log('🔓 Controls unlocked');
   }
 
   /**
@@ -163,7 +161,11 @@ export class Player {
       }
     }
 
-    document.getElementById('info-player-position').innerHTML = this.toString();
+    // Update position display if element exists
+    const infoElement = document.getElementById('info-player-position');
+    if (infoElement) {
+      infoElement.innerHTML = this.toString();
+    }
   }
 
   /**
@@ -249,11 +251,17 @@ export class Player {
       case 'Digit8':
       case 'Digit9':
         // Update the selected toolbar icon
-        document.getElementById(`toolbar-${this.activeBlockId}`)?.classList.remove('selected');
+        const currentToolbar = document.getElementById(`toolbar-${this.activeBlockId}`);
+        if (currentToolbar) {
+          currentToolbar.classList.remove('selected');
+        }
         
         // Digit9 selects the pickaxe (toolbar-0)
         const selectedId = event.key === '9' ? 0 : Number(event.key);
-        document.getElementById(`toolbar-${selectedId}`)?.classList.add('selected');
+        const newToolbar = document.getElementById(`toolbar-${selectedId}`);
+        if (newToolbar) {
+          newToolbar.classList.add('selected');
+        }
 
         this.activeBlockId = selectedId;
 
