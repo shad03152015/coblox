@@ -19,6 +19,8 @@ export default defineConfig({
   },
   envDir: path.resolve(import.meta.dirname),
   root: path.resolve(import.meta.dirname, "client"),
+  // Only include specific asset types, exclude world files entirely
+  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg', '**/*.ico', '**/*.woff', '**/*.woff2'],
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
@@ -27,7 +29,15 @@ export default defineConfig({
       external: [
         /\/world\/.*\.mca$/,
         /\/world\/.*\.dat$/,
+        /client\/world\/.*/,
       ],
+      // Ignore world directory during build scanning
+      onwarn(warning, warn) {
+        // Suppress warnings about large files
+        if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+        if (warning.message.includes('world/')) return;
+        warn(warning);
+      },
     },
     // Increase chunk size warning limit
     chunkSizeWarningLimit: 2000,
