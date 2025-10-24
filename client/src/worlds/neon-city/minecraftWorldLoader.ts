@@ -386,16 +386,16 @@ export class MinecraftWorldLoader {
 
     let loadedCount = 0;
 
-    // Load chunks sequentially with small delay to prevent memory overflow
+    // Load chunks sequentially with aggressive delays to prevent memory overflow
     for (let dx = -radius; dx <= radius; dx++) {
       for (let dz = -radius; dz <= radius; dz++) {
         await this.loadChunk(chunkX + dx, chunkZ + dz);
         loadedCount++;
         
-        // Small delay between chunks to allow garbage collection
-        if (loadedCount % 3 === 0) {
-          await new Promise(resolve => setTimeout(resolve, 50));
-        }
+        // Aggressive delay after EACH chunk to allow garbage collection
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        console.log(`  ⏳ Memory cleanup pause (${loadedCount}/${totalChunks})`);
       }
     }
 
