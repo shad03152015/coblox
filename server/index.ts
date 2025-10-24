@@ -39,8 +39,22 @@ async function startServer() {
 
   app.use(express.static(staticPath));
 
-  // Handle client-side routing - serve index.html for all routes
-  app.get("*", (_req, res) => {
+  // Handle client-side routing - serve index.html ONLY for navigation requests
+  // Skip requests for static assets (files with extensions like .js, .css, .png, etc.)
+  app.get("*", (req, res) => {
+    const filePath = req.path;
+    
+    // If the request has a file extension, it's likely a static asset request
+    // Let it 404 naturally instead of serving index.html
+    const hasExtension = /\.[a-zA-Z0-9]+$/.test(filePath);
+    
+    if (hasExtension) {
+      // Don't serve index.html for asset requests - return 404
+      res.status(404).send('Not found');
+      return;
+    }
+    
+    // For navigation requests (no extension), serve index.html
     res.sendFile(path.join(staticPath, "index.html"));
   });
 
