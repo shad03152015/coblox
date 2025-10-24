@@ -72,6 +72,7 @@ export default function NeonCity() {
           0.1,
           500
         );
+        camera.position.set(0, 8, 12); // Initial camera position behind and above spawn
         gameRef.current.camera = camera;
 
         // Generate procedural neon city with buildings
