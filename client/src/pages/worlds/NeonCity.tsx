@@ -5,7 +5,6 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { io, Socket } from "socket.io-client";
 import { MultiplayerManager } from "../../worlds/neon-city/multiplayerManager";
-import { MinecraftWorldLoader } from "../../worlds/neon-city/minecraftWorldLoader";
 
 
 export default function NeonCity() {
@@ -22,7 +21,6 @@ export default function NeonCity() {
     controls?: OrbitControls;
     socket?: Socket;
     multiplayerManager?: MultiplayerManager;
-    worldLoader?: MinecraftWorldLoader;
     }>({});
 
   useEffect(() => {
@@ -91,13 +89,23 @@ export default function NeonCity() {
         const multiplayerManager = new MultiplayerManager(scene);
         gameRef.current.multiplayerManager = multiplayerManager;
 
-        const worldLoader = new MinecraftWorldLoader(scene);
-        gameRef.current.worldLoader = worldLoader;
+        // DISABLED: Minecraft world loading causes memory overflow
+        // const worldLoader = new MinecraftWorldLoader(scene);
+        // gameRef.current.worldLoader = worldLoader;
 
-        // Load chunks around spawn point (0, 0)
-        console.log('🌍 Loading Minecraft world chunks...');
-        await worldLoader.loadChunksAround(0, 0, 0); // Load 1 chunk only - minimal memory footprint
-        console.log(`✅ Loaded ${worldLoader.getLoadedChunkCount()} chunks`);
+        // Add simple ground plane as placeholder
+        console.log('🌍 Creating ground plane...');
+        const groundGeometry = new THREE.PlaneGeometry(200, 200);
+        const groundMaterial = new THREE.MeshLambertMaterial({ 
+          color: 0x2a2a2a,
+          side: THREE.DoubleSide 
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = 0;
+        ground.receiveShadow = true;
+        scene.add(ground);
+        console.log('✅ Ground plane created');
 
         console.log('🌆 Neon City generated');
 
@@ -278,17 +286,11 @@ export default function NeonCity() {
         gameRef.current.socket.disconnect();
       }
 
-      if (gameRef.current.worldLoader) {
-        gameRef.current.worldLoader.clearAll();
-      }
-    
-
       // Clear multiplayer manager
       if (gameRef.current.multiplayerManager) {
         gameRef.current.multiplayerManager.clearAllPlayers();
       }
 
-  
       // Cancel animation frame
       if (gameRef.current.animationId) {
         cancelAnimationFrame(gameRef.current.animationId);
