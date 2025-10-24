@@ -39,6 +39,10 @@ async function startServer() {
 
   app.use(express.static(staticPath));
 
+  // Serve world assets (textures, models, etc.) from client/world directory
+  const worldAssetsPath = path.resolve(__dirname, "..", "client", "world");
+  app.use('/world', express.static(worldAssetsPath));
+
   // Handle client-side routing - serve index.html ONLY for navigation requests
   // Skip requests for static assets (files with extensions like .js, .css, .png, etc.)
   app.get("*", (req, res) => {
