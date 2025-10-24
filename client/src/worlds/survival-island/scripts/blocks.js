@@ -1,23 +1,23 @@
 import * as THREE from 'three';
 
 // Import all textures as ES modules for proper Vite bundling
-import cactusSideImg from '../public/textures/cactus_side.png';
-import cactusTopImg from '../public/textures/cactus_top.png';
-import dirtImg from '../public/textures/dirt.png';
-import grassImg from '../public/textures/grass.png';
-import grassSideImg from '../public/textures/grass_side.png';
-import coalOreImg from '../public/textures/coal_ore.png';
-import ironOreImg from '../public/textures/iron_ore.png';
-import jungleTreeSideImg from '../public/textures/jungle_tree_side.png';
-import jungleTreeTopImg from '../public/textures/jungle_tree_top.png';
-import jungleLeavesImg from '../public/textures/jungle_leaves.png';
-import leavesImg from '../public/textures/leaves.png';
-import treeSideImg from '../public/textures/tree_side.png';
-import treeTopImg from '../public/textures/tree_top.png';
-import sandImg from '../public/textures/sand.png';
-import snowImg from '../public/textures/snow.png';
-import snowSideImg from '../public/textures/snow_side.png';
-import stoneImg from '../public/textures/stone.png';
+import cactusSideImg from '../../../../world/survival-island/public/textures/cactus_side.png';
+import cactusTopImg from '../../../../world/survival-island/public/textures/cactus_top.png';
+import dirtImg from '../../../../world/survival-island/public/textures/dirt.png';
+import grassImg from '../../../../world/survival-island/public/textures/grass.png';
+import grassSideImg from '../../../../world/survival-island/public/textures/grass_side.png';
+import coalOreImg from '../../../../world/survival-island/public/textures/coal_ore.png';
+import ironOreImg from '../../../../world/survival-island/public/textures/iron_ore.png';
+import jungleTreeSideImg from '../../../../world/survival-island/public/textures/jungle_tree_side.png';
+import jungleTreeTopImg from '../../../../world/survival-island/public/textures/jungle_tree_top.png';
+import jungleLeavesImg from '../../../../world/survival-island/public/textures/jungle_leaves.png';
+import leavesImg from '../../../../world/survival-island/public/textures/leaves.png';
+import treeSideImg from '../../../../world/survival-island/public/textures/tree_side.png';
+import treeTopImg from '../../../../world/survival-island/public/textures/tree_top.png';
+import sandImg from '../../../../world/survival-island/public/textures/sand.png';
+import snowImg from '../../../../world/survival-island/public/textures/snow.png';
+import snowSideImg from '../../../../world/survival-island/public/textures/snow_side.png';
+import stoneImg from '../../../../world/survival-island/public/textures/stone.png';
 
 const textureLoader = new THREE.TextureLoader();
 
