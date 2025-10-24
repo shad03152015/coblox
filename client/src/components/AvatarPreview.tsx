@@ -1,6 +1,7 @@
 import { colorMap } from "@/data/clothing";
 import { hairColorMap } from "@/data/hair";
 import { skinTones } from "@/data/body";
+import { accessoryColorMap } from "@/data/accessories";
 
 interface AvatarPreviewProps {
   shirt: { id: string; color: string };
@@ -8,9 +9,15 @@ interface AvatarPreviewProps {
   shoes: { id: string; color: string };
   body?: { type: string; skinTone: string };
   hair?: { baseStyle: string; elements: string[]; color: string };
+  accessories?: {
+    hat?: { id: string; color: string };
+    glasses?: { id: string; color: string };
+    jewelry?: { id: string; color: string };
+    wings?: { id: string; color: string };
+  };
 }
 
-export function AvatarPreview({ shirt, pants, shoes, body, hair }: AvatarPreviewProps) {
+export function AvatarPreview({ shirt, pants, shoes, body, hair, accessories }: AvatarPreviewProps) {
   const shirtColor = colorMap[shirt.color] || "#339af0";
   const pantsColor = colorMap[pants.color] || "#339af0";
   const shoesColor = colorMap[shoes.color] || "#333333";
