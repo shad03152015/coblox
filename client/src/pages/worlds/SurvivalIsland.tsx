@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import * as THREE from "three";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { io, Socket } from "socket.io-client";
 
 // Import textures
 import grassTexture from "../../../world/survival-island/public/textures/grass.png";
@@ -16,18 +17,19 @@ import leavesTexture from "../../../world/survival-island/public/textures/leaves
 import sandTexture from "../../../world/survival-island/public/textures/sand.png";
 import pickaxeTexture from "../../../world/survival-island/public/textures/pickaxe.png";
 
-// Import game modules from survival-island
-// Note: These will need to be converted to TypeScript or imported as JS modules
-// For now, we'll create a wrapper that initializes the game
-
 export default function SurvivalIsland() {
   const [, setLocation] = useLocation();
+  const [playerCount, setPlayerCount] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<{
     renderer?: THREE.WebGLRenderer;
     stats?: any;
     animationId?: number;
     resizeHandler?: () => void;
+    socket?: Socket;
+    multiplayerManager?: any;
+    player?: any;
+    world?: any;
   }>({});
 
   useEffect(() => {
@@ -38,6 +40,21 @@ export default function SurvivalIsland() {
       setLocation("/");
       return;
     }
+
+    // Get user data for multiplayer
+    const getUserData = () => {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return {
+          userId: payload.userId,
+          username: payload.username || 'Player'
+        };
+      } catch {
+        return { userId: 'unknown', username: 'Player' };
+      }
+    };
+
+    const userData = getUserData();
 
     // Initialize the game
     const initGame = async () => {
@@ -59,6 +76,9 @@ export default function SurvivalIsland() {
         );
         const { ModelLoader } = await import(
           "../../../world/survival-island/scripts/modelLoader.js"
+        );
+        const { MultiplayerManager } = await import(
+          "../../../world/survival-island/scripts/multiplayerManager.js"
         );
 
         // Stats setup
@@ -83,9 +103,75 @@ export default function SurvivalIsland() {
         const world = new World();
         world.generate();
         scene.add(world);
+        gameRef.current.world = world;
 
         const player = new Player(scene, world);
         const physics = new Physics(scene);
+        gameRef.current.player = player;
+
+        // Initialize Multiplayer Manager
+        const multiplayerManager = new MultiplayerManager(scene);
+        gameRef.current.multiplayerManager = multiplayerManager;
+
+        // Initialize Socket.io connection
+        const socket = io(window.location.origin, {
+          auth: { token }
+        });
+        gameRef.current.socket = socket;
+
+        // Socket event handlers
+        socket.on('connect', () => {
+          console.log('🌐 Connected to multiplayer server');
+          toast.success('Connected to multiplayer');
+
+          // Join the survival-island world
+          socket.emit('join-world', {
+            worldId: 'survival-island',
+            username: userData.username
+          });
+        });
+
+        socket.on('disconnect', () => {
+          console.log('🔌 Disconnected from multiplayer server');
+          toast.error('Disconnected from multiplayer');
+        });
+
+        socket.on('existing-players', (players: any[]) => {
+          console.log(`👥 Received ${players.length} existing players`);
+          multiplayerManager.handleExistingPlayers(players);
+          setPlayerCount(players.length);
+        });
+
+        socket.on('player-joined', (playerData: any) => {
+          console.log(`✅ Player joined: ${playerData.username}`);
+          multiplayerManager.createPlayerAvatar(playerData);
+          setPlayerCount(multiplayerManager.getPlayerCount());
+          toast.success(`${playerData.username} joined`);
+        });
+
+        socket.on('player-moved', (data: any) => {
+          multiplayerManager.updatePlayerPosition(data.id, data.position, data.rotation);
+        });
+
+        socket.on('player-left', (data: any) => {
+          console.log(`👋 Player left: ${data.id}`);
+          multiplayerManager.removePlayer(data.id);
+          setPlayerCount(multiplayerManager.getPlayerCount());
+        });
+
+        socket.on('block-placed', (data: any) => {
+          // Sync block placement from other players
+          if (world && data.playerId !== socket.id) {
+            world.addBlockAt(data.position.x, data.position.y, data.position.z, data.blockId);
+          }
+        });
+
+        socket.on('block-destroyed', (data: any) => {
+          // Sync block destruction from other players
+          if (world && data.playerId !== socket.id) {
+            world.removeBlockAt(data.position.x, data.position.y, data.position.z);
+          }
+        });
 
         // Camera setup
         const orbitCamera = new THREE.PerspectiveCamera(
@@ -124,6 +210,37 @@ export default function SurvivalIsland() {
         ambient.intensity = 0.2;
         scene.add(ambient);
 
+        // Track last sent position to avoid sending duplicates
+        let lastSentPosition = { x: 0, y: 0, z: 0 };
+        let lastSentRotation = { x: 0, y: 0 };
+        let positionUpdateTimer = 0;
+
+        // Override world's block add/remove to emit socket events
+        const originalAddBlock = world.addBlockAt;
+        world.addBlockAt = function(x: number, y: number, z: number, blockId: number) {
+          const result = originalAddBlock.call(world, x, y, z, blockId);
+          if (result && socket.connected) {
+            socket.emit('block-placed', {
+              position: { x, y, z },
+              blockId,
+              worldId: 'survival-island'
+            });
+          }
+          return result;
+        };
+
+        const originalRemoveBlock = world.removeBlockAt;
+        world.removeBlockAt = function(x: number, y: number, z: number) {
+          const result = originalRemoveBlock.call(world, x, y, z);
+          if (result && socket.connected) {
+            socket.emit('block-destroyed', {
+              position: { x, y, z },
+              worldId: 'survival-island'
+            });
+          }
+          return result;
+        };
+
         // Render loop
         let previousTime = performance.now();
         function animate() {
@@ -149,7 +266,37 @@ export default function SurvivalIsland() {
               .copy(player.position)
               .add(new THREE.Vector3(16, 16, 16));
             controls.target.copy(player.position);
+
+            // Send position updates to server periodically (10 times per second)
+            positionUpdateTimer += dt;
+            if (positionUpdateTimer >= 0.1) {
+              positionUpdateTimer = 0;
+
+              const currentPos = player.position;
+              const currentRot = player.camera.rotation;
+
+              // Only send if position or rotation changed significantly
+              const posChanged = Math.abs(currentPos.x - lastSentPosition.x) > 0.01 ||
+                                Math.abs(currentPos.y - lastSentPosition.y) > 0.01 ||
+                                Math.abs(currentPos.z - lastSentPosition.z) > 0.01;
+              const rotChanged = Math.abs(currentRot.x - lastSentRotation.x) > 0.01 ||
+                                Math.abs(currentRot.y - lastSentRotation.y) > 0.01;
+
+              if ((posChanged || rotChanged) && socket.connected) {
+                socket.emit('player-move', {
+                  position: { x: currentPos.x, y: currentPos.y, z: currentPos.z },
+                  rotation: { x: currentRot.x, y: currentRot.y },
+                  worldId: 'survival-island'
+                });
+
+                lastSentPosition = { x: currentPos.x, y: currentPos.y, z: currentPos.z };
+                lastSentRotation = { x: currentRot.x, y: currentRot.y };
+              }
+            }
           }
+
+          // Update multiplayer manager (smooth interpolation of other players)
+          multiplayerManager.update(dt);
 
           renderer.render(
             scene,
@@ -186,6 +333,16 @@ export default function SurvivalIsland() {
 
     // Cleanup function
     return () => {
+      // Disconnect socket
+      if (gameRef.current.socket) {
+        gameRef.current.socket.disconnect();
+      }
+
+      // Clear multiplayer manager
+      if (gameRef.current.multiplayerManager) {
+        gameRef.current.multiplayerManager.clearAllPlayers();
+      }
+
       // Cancel animation frame
       if (gameRef.current.animationId) {
         cancelAnimationFrame(gameRef.current.animationId);
@@ -222,6 +379,28 @@ export default function SurvivalIsland() {
         backgroundColor: "#80a0e0",
       }}
     >
+      {/* Multiplayer player count indicator */}
+      <div
+        style={{
+          position: "absolute",
+          top: "16px",
+          right: "16px",
+          backgroundColor: "rgba(0, 0, 0, 0.7)",
+          color: "white",
+          padding: "12px 20px",
+          borderRadius: "8px",
+          fontSize: "18px",
+          fontFamily: "sans-serif",
+          fontWeight: "bold",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+        }}
+      >
+        <span style={{ fontSize: "24px" }}>👥</span>
+        <span>{playerCount + 1} Player{playerCount !== 0 ? 's' : ''} Online</span>
+      </div>
+
       {/* Game UI overlay elements */}
       <div
         id="info"
@@ -343,7 +522,7 @@ export default function SurvivalIsland() {
         }}
       >
         <div id="instructions">
-          <h1 style={{ fontSize: "3em" }}>MINECRAFTjs</h1>
+          <h1 style={{ fontSize: "3em" }}>SURVIVAL ISLAND - MULTIPLAYER</h1>
           WASD - Move
           <br />
           SHIFT - Sprint
