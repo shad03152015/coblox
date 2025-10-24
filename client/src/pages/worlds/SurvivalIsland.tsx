@@ -360,26 +360,20 @@ export default function SurvivalIsland() {
         // Setup UI
         setupUI(world, player, physics, scene);
 
-        // Auto-hide instructions overlay and lock controls after world loads
+        // Lock controls immediately so player starts on the ground
+        // Small delay to ensure everything is initialized
         setTimeout(() => {
           try {
-            const overlay = document.getElementById('overlay');
-            if (overlay) {
-              overlay.style.visibility = 'hidden';
-              console.log('✅ Overlay hidden');
-            }
-          
-            // Lock player controls automatically so they start on the ground
             if (player && player.controls && !player.controls.isLocked) {
               player.controls.lock();
-              console.log('✅ Player controls locked');
+              console.log('✅ Player controls locked - character on ground');
             } else {
               console.warn('⚠️ Player or controls not ready for locking');
             }
           } catch (err) {
-            console.error('❌ Error during auto-initialization:', err);
+            console.error('❌ Error during control locking:', err);
           }
-        }, 500); // Small delay to ensure everything is initialized
+        }, 100); // Minimal delay
 
         // Start animation loop
         animate();
@@ -562,50 +556,6 @@ export default function SurvivalIsland() {
             alt="Pickaxe"
             style={{ width: "64px", height: "64px", outline: "4px solid white" }}
           />
-        </div>
-      </div>
-
-      <div
-        id="overlay"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-          backgroundColor: "#00000080",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "2em",
-          color: "white",
-          textAlign: "center",
-        }}
-      >
-        <div id="instructions">
-          <h1 style={{ fontSize: "3em" }}>SURVIVAL ISLAND - MULTIPLAYER</h1>
-          WASD - Move
-          <br />
-          SHIFT - Sprint
-          <br />
-          SPACE - Jump
-          <br />
-          R - Reset Camera
-          <br />
-          U - Toggle UI
-          <br />
-          9 - Pickaxe
-          <br />
-          1-8 - Select Block
-          <br />
-          F1 - Save Game
-          <br />
-          F2 - Load Game
-          <br />
-          F10 - Debug Camera
-          <br />
-          <br />
-          <h2>PRESS ANY KEY TO START</h2>
         </div>
       </div>
 
