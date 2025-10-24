@@ -286,17 +286,11 @@ export default function NeonCity() {
         gameRef.current.socket.disconnect();
       }
 
-      if (gameRef.current.worldLoader) {
-        gameRef.current.worldLoader.clearAll();
-      }
-    
-
       // Clear multiplayer manager
       if (gameRef.current.multiplayerManager) {
         gameRef.current.multiplayerManager.clearAllPlayers();
       }
 
-  
       // Cancel animation frame
       if (gameRef.current.animationId) {
         cancelAnimationFrame(gameRef.current.animationId);
