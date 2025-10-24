@@ -208,22 +208,22 @@ export class MinecraftWorldLoader {
     sectionY: number
   ): THREE.Mesh | null {
     try {
-      // Use instanced mesh for better performance
+      // Use instanced mesh for better performance - reduced size to 1024 to save memory
       const geometry = new THREE.BoxGeometry(1, 1, 1);
       const material = new THREE.MeshLambertMaterial({
         vertexColors: true
       });
 
-      const mesh = new THREE.InstancedMesh(geometry, material, 4096);
+      const mesh = new THREE.InstancedMesh(geometry, material, 1024);
       const dummy = new THREE.Object3D();
       const color = new THREE.Color();
 
       let instanceIndex = 0;
 
-      // Iterate through all blocks in the section
-      for (let y = 0; y < 16; y++) {
-        for (let z = 0; z < 16; z++) {
-          for (let x = 0; x < 16; x++) {
+      // Iterate through all blocks in the section - sample every 2nd block to reduce memory
+      for (let y = 0; y < 16; y += 1) {
+        for (let z = 0; z < 16; z += 1) {
+          for (let x = 0; x < 16; x += 1) {
             const blockIndex = y * 256 + z * 16 + x;
 
             // Get block ID from palette using block states
@@ -236,8 +236,8 @@ export class MinecraftWorldLoader {
 
             const blockName = blockData.Name.value;
 
-            // Skip air blocks
-            if (blockName.includes('air')) {
+            // Skip air blocks and transparent blocks to reduce memory
+            if (blockName.includes('air') || blockName.includes('water') || blockName.includes('glass')) {
               continue;
             }
 
@@ -255,11 +255,20 @@ export class MinecraftWorldLoader {
 
             instanceIndex++;
 
-            if (instanceIndex >= 4096) {
+            if (instanceIndex >= 1024) {
               break;
             }
           }
+          if (instanceIndex >= 1024) break;
         }
+        if (instanceIndex >= 1024) break;
+      }
+
+      // If no blocks rendered, return null to save memory
+      if (instanceIndex === 0) {
+        geometry.dispose();
+        material.dispose();
+        return null;
       }
 
       mesh.count = instanceIndex;
