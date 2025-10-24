@@ -418,6 +418,11 @@ export default function AvatarCustomize() {
     } else if (currentCategory === "hair") {
       if (currentHairTab === "base-styles") return "Search for hair styles...";
       if (currentHairTab === "elements") return "Search for hair elements...";
+    } else if (currentCategory === "accessories") {
+      if (currentAccessoriesTab === "hats") return "Search for hats...";
+      if (currentAccessoriesTab === "glasses") return "Search for glasses...";
+      if (currentAccessoriesTab === "jewelry") return "Search for jewelry...";
+      if (currentAccessoriesTab === "wings") return "Search for wings...";
     }
     return "Search...";
   };
@@ -427,6 +432,7 @@ export default function AvatarCustomize() {
     if (currentCategory === "clothing") return "Avatar Customization";
     if (currentCategory === "body") return "Stylist's Workbench";
     if (currentCategory === "hair") return "Stylist's Workbench";
+    if (currentCategory === "accessories") return "Avatar Customization";
     return "Avatar Customization";
   };
 
