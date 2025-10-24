@@ -254,6 +254,80 @@ export default function AvatarCustomize() {
     setHasUnsavedChanges(true);
   };
 
+  // Handle accessories tab change
+  const handleAccessoriesTabChange = (tab: AccessoriesTabType) => {
+    setCurrentAccessoriesTab(tab);
+    setSearchQuery("");
+  };
+
+  // Handle accessory selection
+  const handleAccessorySelect = (accessoryId: string) => {
+    const selection = { id: accessoryId, color: currentColor };
+
+    if (currentAccessoriesTab === "hats") {
+      setSelectedAccessories({ ...selectedAccessories, hat: selection });
+    } else if (currentAccessoriesTab === "glasses") {
+      setSelectedAccessories({ ...selectedAccessories, glasses: selection });
+    } else if (currentAccessoriesTab === "jewelry") {
+      setSelectedAccessories({ ...selectedAccessories, jewelry: selection });
+    } else if (currentAccessoriesTab === "wings") {
+      setSelectedAccessories({ ...selectedAccessories, wings: selection });
+    }
+
+    setHasUnsavedChanges(true);
+  };
+
+  // Handle accessory removal
+  const handleAccessoryRemove = () => {
+    if (currentAccessoriesTab === "hats") {
+      const { hat, ...rest } = selectedAccessories;
+      setSelectedAccessories(rest);
+    } else if (currentAccessoriesTab === "glasses") {
+      const { glasses, ...rest } = selectedAccessories;
+      setSelectedAccessories(rest);
+    } else if (currentAccessoriesTab === "jewelry") {
+      const { jewelry, ...rest } = selectedAccessories;
+      setSelectedAccessories(rest);
+    } else if (currentAccessoriesTab === "wings") {
+      const { wings, ...rest } = selectedAccessories;
+      setSelectedAccessories(rest);
+    }
+
+    setHasUnsavedChanges(true);
+  };
+
+  // Get filtered accessories items
+  const getFilteredAccessoriesItems = () => {
+    let categoryItems = accessories.filter((item) => {
+      if (currentAccessoriesTab === "hats") return item.category === "hat";
+      if (currentAccessoriesTab === "glasses") return item.category === "glasses";
+      if (currentAccessoriesTab === "jewelry") return item.category === "jewelry";
+      if (currentAccessoriesTab === "wings") return item.category === "wings";
+      return false;
+    });
+
+    if (searchQuery.trim()) {
+      categoryItems = categoryItems.filter((item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    return categoryItems;
+  };
+
+  // Check if accessory is selected
+  const isAccessorySelected = (accessoryId: string): boolean => {
+    if (currentAccessoriesTab === "hats")
+      return selectedAccessories.hat?.id === accessoryId && selectedAccessories.hat?.color === currentColor;
+    if (currentAccessoriesTab === "glasses")
+      return selectedAccessories.glasses?.id === accessoryId && selectedAccessories.glasses?.color === currentColor;
+    if (currentAccessoriesTab === "jewelry")
+      return selectedAccessories.jewelry?.id === accessoryId && selectedAccessories.jewelry?.color === currentColor;
+    if (currentAccessoriesTab === "wings")
+      return selectedAccessories.wings?.id === accessoryId && selectedAccessories.wings?.color === currentColor;
+    return false;
+  };
+
   // Check if clothing item is selected
   const isClothingItemSelected = (itemId: string): boolean => {
     if (currentClothingTab === "shirts")
