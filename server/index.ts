@@ -5,6 +5,8 @@ import { fileURLToPath } from "url";
 import { connectDB } from "./db/index.js";
 import authRoutes from "./routes/auth.js";
 import characterRoutes from "./routes/character.js";
+import notificationRoutes from "./routes/notification.js";
+import friendsRoutes from "./routes/friends.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,6 +24,8 @@ async function startServer() {
   // API routes
   app.use('/api', authRoutes);
   app.use('/api', characterRoutes);
+  app.use('/api', notificationRoutes);
+  app.use('/api', friendsRoutes);
 
   // Serve static files from dist/public in production
   const staticPath =
