@@ -68,4 +68,105 @@ router.post('/character', authMiddleware, async (req: Request, res: Response) =>
   }
 });
 
+// PATCH /api/character/avatar - Save avatar appearance for authenticated user
+router.patch('/character/avatar', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { avatarAppearance } = req.body;
+
+    // Validate avatarAppearance is provided
+    if (!avatarAppearance) {
+      return res.status(400).json({ error: 'Avatar appearance is required' });
+    }
+
+    // Validate structure - must have shirt, pants, shoes
+    if (!avatarAppearance.shirt || !avatarAppearance.pants || !avatarAppearance.shoes) {
+      return res.status(400).json({ error: 'Avatar appearance must include shirt, pants, and shoes' });
+    }
+
+    // Validate each item has id and color
+    const items = [avatarAppearance.shirt, avatarAppearance.pants, avatarAppearance.shoes];
+    for (const item of items) {
+      if (!item.id || !item.color) {
+        return res.status(400).json({ error: 'Each clothing item must have an id and color' });
+      }
+    }
+
+    // Validate colors
+    const validColors = ['red', 'green', 'blue', 'pink', 'purple', 'cyan', 'black'];
+    for (const item of items) {
+      const normalizedColor = item.color.toLowerCase();
+      if (!validColors.includes(normalizedColor)) {
+        return res.status(400).json({ error: `Invalid color: ${item.color}. Must be one of: ${validColors.join(', ')}` });
+      }
+      // Normalize to lowercase
+      item.color = normalizedColor;
+    }
+
+    // Valid clothing item IDs
+    const validShirtIds = ['tshirt', 'plaid-shirt', 'hoodie', 'polo', 'jacket', 'striped-shirt', 'denim-shirt', 'button-up'];
+    const validPantsIds = ['jeans', 'cargo-pants', 'chinos', 'joggers', 'shorts', 'dress-pants'];
+    const validShoesIds = ['sneakers', 'boots', 'sandals', 'dress-shoes', 'high-tops', 'loafers'];
+
+    if (!validShirtIds.includes(avatarAppearance.shirt.id)) {
+      return res.status(400).json({ error: `Invalid shirt id: ${avatarAppearance.shirt.id}` });
+    }
+    if (!validPantsIds.includes(avatarAppearance.pants.id)) {
+      return res.status(400).json({ error: `Invalid pants id: ${avatarAppearance.pants.id}` });
+    }
+    if (!validShoesIds.includes(avatarAppearance.shoes.id)) {
+      return res.status(400).json({ error: `Invalid shoes id: ${avatarAppearance.shoes.id}` });
+    }
+
+    // Get authenticated user
+    const userId = req.user!.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Update user's avatar appearance
+    user.avatarAppearance = {
+      shirt: avatarAppearance.shirt,
+      pants: avatarAppearance.pants,
+      shoes: avatarAppearance.shoes,
+    };
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      avatarAppearance: user.avatarAppearance,
+    });
+  } catch (error) {
+    console.error('Error saving avatar appearance:', error);
+    return res.status(500).json({ error: 'Something went wrong, please try again' });
+  }
+});
+
+// GET /api/character/profile - Get user profile including avatar appearance
+router.get('/character/profile', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    // Get authenticated user
+    const userId = req.user!.userId;
+    const user = await User.findById(userId).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user: {
+        email: user.email,
+        characterName: user.characterName,
+        avatarAppearance: user.avatarAppearance,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    return res.status(500).json({ error: 'Something went wrong, please try again' });
+  }
+});
+
 export default router;
