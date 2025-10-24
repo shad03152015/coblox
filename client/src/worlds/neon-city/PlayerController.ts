@@ -294,6 +294,34 @@ export class PlayerController {
   }
 
   /**
+   * Reset for new round
+   */
+  reset(newPosition: THREE.Vector3): void {
+    this.position.copy(newPosition);
+    this.lastPosition.copy(newPosition);
+    this.mesh.position.copy(newPosition);
+    this.velocity.set(0, 0, 0);
+    this.direction.set(0, 0, 0);
+    this.distanceTraveled = 0;
+    this.isAlive = true;
+    this.currentSpeed = this.moveSpeed;
+
+    // Reset visual to green
+    this.mesh.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        if (child.material instanceof THREE.MeshStandardMaterial) {
+          child.material.color.setHex(0x00ff00);
+          child.material.emissive.setHex(0x00ff00);
+        } else if (child.material instanceof THREE.MeshBasicMaterial) {
+          child.material.color.setHex(0x00ff00);
+        }
+      }
+    });
+
+    console.log('🔄 Player reset for new round');
+  }
+
+  /**
    * Cleanup
    */
   dispose(): void {
