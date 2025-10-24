@@ -8,7 +8,7 @@ export class ModelLoader {
   };
 
   constructor(onLoad) {
-    this.loader.load('./models/pickaxe.glb', (model) => {
+    this.loader.load('/world/survival-island/public/models/pickaxe.glb', (model) => {
       const mesh = model.scene;
       this.models.pickaxe = mesh;
       onLoad(this.models);
