@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import CharacterCreate from "./pages/CharacterCreate";
+import AvatarCustomize from "./pages/AvatarCustomize";
 import Profile from "./pages/Profile";
 
 function Router() {
@@ -14,6 +15,7 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Login} />
       <Route path={"/character-create"} component={CharacterCreate} />
+      <Route path={"/avatar-customize"} component={AvatarCustomize} />
       <Route path={"/home"} component={Home} />
       <Route path={"/profile"} component={Profile} />
       <Route path={"/404"} component={NotFound} />
