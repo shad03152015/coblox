@@ -565,11 +565,24 @@ export default function AvatarCustomize() {
           </span>
         </div>
 
-        {/* Accessories button (disabled) */}
-        <div className="flex flex-col items-center gap-2 opacity-50 cursor-not-allowed">
-          <div className="w-14 h-14 rounded-lg bg-gray-700 border-2 border-gray-600 flex items-center justify-center">
+        {/* Accessories button */}
+        <div
+          className={`flex flex-col items-center gap-2 cursor-pointer ${
+            currentCategory === "accessories" ? "" : "opacity-70"
+          }`}
+          onClick={() => handleCategoryChange("accessories")}
+        >
+          <div
+            className={`w-14 h-14 rounded-lg flex items-center justify-center ${
+              currentCategory === "accessories"
+                ? "bg-[#00d9ff] bg-opacity-20 border-2 border-[#00d9ff]"
+                : "bg-gray-700 border-2 border-gray-600"
+            }`}
+          >
             <svg
-              className="w-8 h-8 text-gray-500"
+              className={`w-8 h-8 ${
+                currentCategory === "accessories" ? "text-[#00d9ff]" : "text-gray-400"
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -582,7 +595,13 @@ export default function AvatarCustomize() {
               />
             </svg>
           </div>
-          <span className="text-gray-500 text-xs font-medium">Accessories</span>
+          <span
+            className={`text-xs font-medium ${
+              currentCategory === "accessories" ? "text-[#00d9ff]" : "text-gray-400"
+            }`}
+          >
+            Accessories
+          </span>
         </div>
       </div>
 
