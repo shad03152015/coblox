@@ -228,4 +228,28 @@ router.get('/character/profile', authMiddleware, async (req: Request, res: Respo
   }
 });
 
+// GET /api/character/profile-summary - Get basic user profile for header display
+router.get('/character/profile-summary', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    // Get authenticated user
+    const userId = req.user!.userId;
+    const user = await User.findById(userId).select('characterName avatarAppearance');
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user: {
+        characterName: user.characterName,
+        avatarAppearance: user.avatarAppearance,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching profile summary:', error);
+    return res.status(500).json({ success: false, error: 'Something went wrong, please try again' });
+  }
+});
+
 export default router;
