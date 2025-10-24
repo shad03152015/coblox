@@ -374,7 +374,7 @@ export default function AvatarCustomize() {
       if (response.data.success) {
         toast.success("Avatar saved successfully!");
         setHasUnsavedChanges(false);
-        setTimeout(() => setLocation("/profile"), 500);
+        setTimeout(() => setLocation("/home"), 500);
       }
     } catch (error: any) {
       if (error.response?.status === 401) {
