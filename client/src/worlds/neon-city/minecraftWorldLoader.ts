@@ -158,9 +158,15 @@ export class MinecraftWorldLoader {
         return null;
       }
 
-      // Process each section (16x16x16 blocks)
+      // Process each section (16x16x16 blocks) - only render surface sections to reduce memory
+      let renderedSections = 0;
       sections.forEach((section: any) => {
         const sectionY = section.Y?.value || 0;
+
+        // Only render surface sections (Y >= 4) to drastically reduce memory usage
+        if (sectionY < 4) {
+          return;
+        }
 
         // Skip empty sections
         if (!section.Palette || !section.BlockStates) {
@@ -174,8 +180,11 @@ export class MinecraftWorldLoader {
         const sectionMesh = this.renderSection(palette, blockStates, chunkX, chunkZ, sectionY);
         if (sectionMesh) {
           chunkGroup.add(sectionMesh);
+          renderedSections++;
         }
       });
+
+      console.log(`  📊 Rendered ${renderedSections} surface sections for chunk (${chunkX}, ${chunkZ})`);
 
       // Position the chunk group
       chunkGroup.position.set(chunkX * 16, 0, chunkZ * 16);
