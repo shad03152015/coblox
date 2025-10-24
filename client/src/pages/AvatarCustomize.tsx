@@ -16,10 +16,12 @@ import { AvatarPreview } from "@/components/AvatarPreview";
 import { clothingItems, availableColors } from "@/data/clothing";
 import { hairBaseStyles, hairElements } from "@/data/hair";
 import { bodyTypes, skinTones } from "@/data/body";
+import { accessories, accessoryColors } from "@/data/accessories";
 
-type CategoryType = "clothing" | "body" | "hair";
+type CategoryType = "clothing" | "body" | "hair" | "accessories";
 type ClothingTabType = "shirts" | "pants" | "shoes";
 type HairTabType = "base-styles" | "elements";
+type AccessoriesTabType = "hats" | "glasses" | "jewelry" | "wings";
 
 interface ClothingSelection {
   id: string;
@@ -35,6 +37,13 @@ interface HairSelection {
   baseStyle: string;
   elements: string[];
   color: string;
+}
+
+interface AccessoriesSelection {
+  hat?: { id: string; color: string };
+  glasses?: { id: string; color: string };
+  jewelry?: { id: string; color: string };
+  wings?: { id: string; color: string };
 }
 
 export default function AvatarCustomize() {
@@ -70,9 +79,13 @@ export default function AvatarCustomize() {
     color: "black",
   });
 
+  // Accessories selections
+  const [selectedAccessories, setSelectedAccessories] = useState<AccessoriesSelection>({});
+
   // UI state
   const [currentClothingTab, setCurrentClothingTab] = useState<ClothingTabType>("shirts");
   const [currentHairTab, setCurrentHairTab] = useState<HairTabType>("base-styles");
+  const [currentAccessoriesTab, setCurrentAccessoriesTab] = useState<AccessoriesTabType>("hats");
   const [currentColor, setCurrentColor] = useState<string>("red");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
@@ -112,6 +125,9 @@ export default function AvatarCustomize() {
 
           // Load hair
           if (appearance.hair) setSelectedHair(appearance.hair);
+
+          // Load accessories
+          if (appearance.accessories) setSelectedAccessories(appearance.accessories);
         }
       } catch (error: any) {
         if (error.response?.status === 401) {
@@ -238,6 +254,80 @@ export default function AvatarCustomize() {
     setHasUnsavedChanges(true);
   };
 
+  // Handle accessories tab change
+  const handleAccessoriesTabChange = (tab: AccessoriesTabType) => {
+    setCurrentAccessoriesTab(tab);
+    setSearchQuery("");
+  };
+
+  // Handle accessory selection
+  const handleAccessorySelect = (accessoryId: string) => {
+    const selection = { id: accessoryId, color: currentColor };
+
+    if (currentAccessoriesTab === "hats") {
+      setSelectedAccessories({ ...selectedAccessories, hat: selection });
+    } else if (currentAccessoriesTab === "glasses") {
+      setSelectedAccessories({ ...selectedAccessories, glasses: selection });
+    } else if (currentAccessoriesTab === "jewelry") {
+      setSelectedAccessories({ ...selectedAccessories, jewelry: selection });
+    } else if (currentAccessoriesTab === "wings") {
+      setSelectedAccessories({ ...selectedAccessories, wings: selection });
+    }
+
+    setHasUnsavedChanges(true);
+  };
+
+  // Handle accessory removal
+  const handleAccessoryRemove = () => {
+    if (currentAccessoriesTab === "hats") {
+      const { hat, ...rest } = selectedAccessories;
+      setSelectedAccessories(rest);
+    } else if (currentAccessoriesTab === "glasses") {
+      const { glasses, ...rest } = selectedAccessories;
+      setSelectedAccessories(rest);
+    } else if (currentAccessoriesTab === "jewelry") {
+      const { jewelry, ...rest } = selectedAccessories;
+      setSelectedAccessories(rest);
+    } else if (currentAccessoriesTab === "wings") {
+      const { wings, ...rest } = selectedAccessories;
+      setSelectedAccessories(rest);
+    }
+
+    setHasUnsavedChanges(true);
+  };
+
+  // Get filtered accessories items
+  const getFilteredAccessoriesItems = () => {
+    let categoryItems = accessories.filter((item) => {
+      if (currentAccessoriesTab === "hats") return item.category === "hat";
+      if (currentAccessoriesTab === "glasses") return item.category === "glasses";
+      if (currentAccessoriesTab === "jewelry") return item.category === "jewelry";
+      if (currentAccessoriesTab === "wings") return item.category === "wings";
+      return false;
+    });
+
+    if (searchQuery.trim()) {
+      categoryItems = categoryItems.filter((item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    return categoryItems;
+  };
+
+  // Check if accessory is selected
+  const isAccessorySelected = (accessoryId: string): boolean => {
+    if (currentAccessoriesTab === "hats")
+      return selectedAccessories.hat?.id === accessoryId && selectedAccessories.hat?.color === currentColor;
+    if (currentAccessoriesTab === "glasses")
+      return selectedAccessories.glasses?.id === accessoryId && selectedAccessories.glasses?.color === currentColor;
+    if (currentAccessoriesTab === "jewelry")
+      return selectedAccessories.jewelry?.id === accessoryId && selectedAccessories.jewelry?.color === currentColor;
+    if (currentAccessoriesTab === "wings")
+      return selectedAccessories.wings?.id === accessoryId && selectedAccessories.wings?.color === currentColor;
+    return false;
+  };
+
   // Check if clothing item is selected
   const isClothingItemSelected = (itemId: string): boolean => {
     if (currentClothingTab === "shirts")
@@ -271,6 +361,7 @@ export default function AvatarCustomize() {
             shoes: selectedShoes,
             body: selectedBody,
             hair: selectedHair,
+            accessories: selectedAccessories,
           },
         },
         {
@@ -327,6 +418,11 @@ export default function AvatarCustomize() {
     } else if (currentCategory === "hair") {
       if (currentHairTab === "base-styles") return "Search for hair styles...";
       if (currentHairTab === "elements") return "Search for hair elements...";
+    } else if (currentCategory === "accessories") {
+      if (currentAccessoriesTab === "hats") return "Search for hats...";
+      if (currentAccessoriesTab === "glasses") return "Search for glasses...";
+      if (currentAccessoriesTab === "jewelry") return "Search for jewelry...";
+      if (currentAccessoriesTab === "wings") return "Search for wings...";
     }
     return "Search...";
   };
@@ -336,6 +432,7 @@ export default function AvatarCustomize() {
     if (currentCategory === "clothing") return "Avatar Customization";
     if (currentCategory === "body") return "Stylist's Workbench";
     if (currentCategory === "hair") return "Stylist's Workbench";
+    if (currentCategory === "accessories") return "Avatar Customization";
     return "Avatar Customization";
   };
 
@@ -468,11 +565,24 @@ export default function AvatarCustomize() {
           </span>
         </div>
 
-        {/* Accessories button (disabled) */}
-        <div className="flex flex-col items-center gap-2 opacity-50 cursor-not-allowed">
-          <div className="w-14 h-14 rounded-lg bg-gray-700 border-2 border-gray-600 flex items-center justify-center">
+        {/* Accessories button */}
+        <div
+          className={`flex flex-col items-center gap-2 cursor-pointer ${
+            currentCategory === "accessories" ? "" : "opacity-70"
+          }`}
+          onClick={() => handleCategoryChange("accessories")}
+        >
+          <div
+            className={`w-14 h-14 rounded-lg flex items-center justify-center ${
+              currentCategory === "accessories"
+                ? "bg-[#00d9ff] bg-opacity-20 border-2 border-[#00d9ff]"
+                : "bg-gray-700 border-2 border-gray-600"
+            }`}
+          >
             <svg
-              className="w-8 h-8 text-gray-500"
+              className={`w-8 h-8 ${
+                currentCategory === "accessories" ? "text-[#00d9ff]" : "text-gray-400"
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -485,7 +595,13 @@ export default function AvatarCustomize() {
               />
             </svg>
           </div>
-          <span className="text-gray-500 text-xs font-medium">Accessories</span>
+          <span
+            className={`text-xs font-medium ${
+              currentCategory === "accessories" ? "text-[#00d9ff]" : "text-gray-400"
+            }`}
+          >
+            Accessories
+          </span>
         </div>
       </div>
 
@@ -789,6 +905,146 @@ export default function AvatarCustomize() {
             </div>
           </>
         )}
+
+        {/* Accessories Section */}
+        {currentCategory === "accessories" && (
+          <>
+            {/* Tabs */}
+            <div className="flex gap-4 mb-6 border-b border-gray-700">
+              <button
+                onClick={() => handleAccessoriesTabChange("hats")}
+                className={`px-6 py-3 font-semibold transition-all ${
+                  currentAccessoriesTab === "hats"
+                    ? "text-[#00d9ff] border-b-3 border-[#00d9ff]"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+                style={{
+                  borderBottomWidth: currentAccessoriesTab === "hats" ? "3px" : "0",
+                  borderBottomColor: currentAccessoriesTab === "hats" ? "#00d9ff" : "transparent",
+                }}
+              >
+                Hats
+              </button>
+              <button
+                onClick={() => handleAccessoriesTabChange("glasses")}
+                className={`px-6 py-3 font-semibold transition-all ${
+                  currentAccessoriesTab === "glasses"
+                    ? "text-[#00d9ff] border-b-3 border-[#00d9ff]"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+                style={{
+                  borderBottomWidth: currentAccessoriesTab === "glasses" ? "3px" : "0",
+                  borderBottomColor: currentAccessoriesTab === "glasses" ? "#00d9ff" : "transparent",
+                }}
+              >
+                Glasses
+              </button>
+              <button
+                onClick={() => handleAccessoriesTabChange("jewelry")}
+                className={`px-6 py-3 font-semibold transition-all ${
+                  currentAccessoriesTab === "jewelry"
+                    ? "text-[#00d9ff] border-b-3 border-[#00d9ff]"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+                style={{
+                  borderBottomWidth: currentAccessoriesTab === "jewelry" ? "3px" : "0",
+                  borderBottomColor: currentAccessoriesTab === "jewelry" ? "#00d9ff" : "transparent",
+                }}
+              >
+                Jewelry
+              </button>
+              <button
+                onClick={() => handleAccessoriesTabChange("wings")}
+                className={`px-6 py-3 font-semibold transition-all ${
+                  currentAccessoriesTab === "wings"
+                    ? "text-[#00d9ff] border-b-3 border-[#00d9ff]"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+                style={{
+                  borderBottomWidth: currentAccessoriesTab === "wings" ? "3px" : "0",
+                  borderBottomColor: currentAccessoriesTab === "wings" ? "#00d9ff" : "transparent",
+                }}
+              >
+                Wings
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="mb-6">
+              <Input
+                type="text"
+                placeholder={getSearchPlaceholder()}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full max-w-md bg-[#0d1230] border-gray-700 text-white placeholder-gray-500"
+              />
+            </div>
+
+            {/* Color Filter */}
+            <div className="mb-8">
+              <h3 className="text-white font-bold text-lg mb-3">Color</h3>
+              <div className="flex gap-3">
+                {availableColors.map((color) => (
+                  <button
+                    key={color.name}
+                    onClick={() => handleColorSelect(color.name)}
+                    className={`w-12 h-12 rounded-full transition-all ${
+                      currentColor === color.name
+                        ? "ring-4 ring-white ring-opacity-80 scale-110"
+                        : "hover:scale-105"
+                    }`}
+                    style={{ backgroundColor: color.hex }}
+                    title={color.name}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Items Grid */}
+            <div className="grid grid-cols-3 gap-6">
+              {getFilteredAccessoriesItems().length === 0 ? (
+                <div className="col-span-3 text-center py-12">
+                  <p className="text-gray-400 text-lg">No items found. Try a different search.</p>
+                </div>
+              ) : (
+                getFilteredAccessoriesItems().map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => handleAccessorySelect(item.id)}
+                    className={`cursor-pointer rounded-lg p-4 transition-all ${
+                      isAccessorySelected(item.id)
+                        ? "bg-[#00d9ff] bg-opacity-20 border-3 border-[#00d9ff]"
+                        : "bg-[#0d1230] border-2 border-gray-700 hover:border-gray-500"
+                    }`}
+                    style={{
+                      borderWidth: isAccessorySelected(item.id) ? "3px" : "2px",
+                    }}
+                  >
+                    <div
+                      className="w-full aspect-square rounded-lg mb-3"
+                      style={{
+                        backgroundColor:
+                          availableColors.find((c) => c.name === currentColor)?.hex || "#339af0",
+                      }}
+                    />
+                    <p className="text-white text-center font-medium">{item.name}</p>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Remove Button */}
+            <div className="mt-6">
+              <Button
+                onClick={handleAccessoryRemove}
+                variant="outline"
+                className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              >
+                Remove
+              </Button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Right Preview Panel */}
@@ -801,6 +1057,7 @@ export default function AvatarCustomize() {
             shoes={selectedShoes}
             body={selectedBody}
             hair={selectedHair}
+            accessories={selectedAccessories}
           />
         </div>
 
