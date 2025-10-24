@@ -22,6 +22,24 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      // Exclude large world files from bundling to prevent memory issues
+      external: [
+        /\/world\/.*\.mca$/,
+        /\/world\/.*\.dat$/,
+      ],
+    },
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 2000,
+  },
+  optimizeDeps: {
+    // Exclude prismarine packages to avoid eval issues during build
+    exclude: [
+      'prismarine-nbt',
+      'prismarine-chunk',
+      'prismarine-viewer',
+      'minecraft-data',
+    ],
   },
   server: {
     port: 3000,
@@ -36,6 +54,16 @@ export default defineConfig({
       "localhost",
       "127.0.0.1",
     ],
+    watch: {
+      // Ignore large world files to prevent memory issues during dev and build
+      ignored: [
+        '**/world/**/*.mca',
+        '**/world/**/*.dat',
+        '**/world/**/*.dat_old',
+        '**/world/**/region/**',
+        '**/neon-city/region/**',
+      ],
+    },
     fs: {
       strict: true,
       deny: ["**/.*"],
