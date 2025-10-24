@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { io, Socket } from "socket.io-client";
 import { MultiplayerManager } from "../../worlds/neon-city/multiplayerManager";
-import { MinecraftWorldLoader } from "../../../world/neon-city/scripts/minecraftWorldLoader";
+import { MinecraftWorldLoader } from "../../worlds/neon-city/minecraftWorldLoader";
 
 
 export default function NeonCity() {
