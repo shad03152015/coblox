@@ -1,6 +1,6 @@
 import { Server as SocketIOServer } from 'socket.io';
 import { Server as HTTPServer } from 'http';
-import jwt from 'jsonwebtoken';
+import { verifyToken } from '../utils/jwt.js';
 import { User } from '../db/models/User.js';
 
 interface PlayerData {
@@ -36,7 +36,7 @@ export function initializeMultiplayer(httpServer: HTTPServer) {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'blockverse-secret-key') as any;
+      const decoded = verifyToken(token);
       socket.data.userId = decoded.userId;
 
       // Fetch user from database to get characterName
@@ -49,6 +49,7 @@ export function initializeMultiplayer(httpServer: HTTPServer) {
 
       next();
     } catch (err) {
+      console.error('Socket.io authentication error:', err);
       next(new Error('Authentication error'));
     }
   });
