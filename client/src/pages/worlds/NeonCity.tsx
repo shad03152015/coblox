@@ -96,7 +96,7 @@ export default function NeonCity() {
 
         // Load chunks around spawn point (0, 0)
         console.log('🌍 Loading Minecraft world chunks...');
-        await worldLoader.loadChunksAround(0, 0, 1); // Load 3x3 chunks (9 chunks) - reduced to prevent memory issues
+        await worldLoader.loadChunksAround(0, 0, 0); // Load 1 chunk only - minimal memory footprint
         console.log(`✅ Loaded ${worldLoader.getLoadedChunkCount()} chunks`);
 
         console.log('🌆 Neon City generated');
