@@ -82,6 +82,10 @@ export class MinecraftWorldLoader {
         }
       }
 
+      // Explicitly clear references to help garbage collection
+      // @ts-ignore
+      chunkData = null;
+
     } catch (error) {
       console.error(`Error loading chunk (${chunkX}, ${chunkZ}):`, error);
     }
