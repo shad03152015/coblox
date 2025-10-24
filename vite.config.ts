@@ -27,10 +27,19 @@ export default defineConfig({
       external: [
         /\/world\/.*\.mca$/,
         /\/world\/.*\.dat$/,
+        // Exclude entire world directories to prevent scanning
+        /client\/world\/.*/,
       ],
     },
     // Increase chunk size warning limit
     chunkSizeWarningLimit: 2000,
+    // Don't minify prismarine packages to avoid eval issues
+    commonjsOptions: {
+      exclude: [
+        /node_modules\/prismarine-.*/,
+        /node_modules\/minecraft-data.*/,
+      ],
+    },
   },
   optimizeDeps: {
     // Exclude prismarine packages from pre-bundling to avoid eval issues and memory problems
