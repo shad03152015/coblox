@@ -6,16 +6,16 @@ import Stats from "three/examples/jsm/libs/stats.module.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { io, Socket } from "socket.io-client";
 
-// Import textures
-import grassTexture from "../../../world/survival-island/public/textures/grass.png";
-import dirtTexture from "../../../world/survival-island/public/textures/dirt.png";
-import stoneTexture from "../../../world/survival-island/public/textures/stone.png";
-import coalOreTexture from "../../../world/survival-island/public/textures/coal_ore.png";
-import ironOreTexture from "../../../world/survival-island/public/textures/iron_ore.png";
-import treeTopTexture from "../../../world/survival-island/public/textures/tree_top.png";
-import leavesTexture from "../../../world/survival-island/public/textures/leaves.png";
-import sandTexture from "../../../world/survival-island/public/textures/sand.png";
-import pickaxeTexture from "../../../world/survival-island/public/textures/pickaxe.png";
+// Texture URLs - use direct paths served by Express /world route
+const grassTexture = "/world/survival-island/public/textures/grass.png";
+const dirtTexture = "/world/survival-island/public/textures/dirt.png";
+const stoneTexture = "/world/survival-island/public/textures/stone.png";
+const coalOreTexture = "/world/survival-island/public/textures/coal_ore.png";
+const ironOreTexture = "/world/survival-island/public/textures/iron_ore.png";
+const treeTopTexture = "/world/survival-island/public/textures/tree_top.png";
+const leavesTexture = "/world/survival-island/public/textures/leaves.png";
+const sandTexture = "/world/survival-island/public/textures/sand.png";
+const pickaxeTexture = "/world/survival-island/public/textures/pickaxe.png";
 
 export default function SurvivalIsland() {
   const [, setLocation] = useLocation();
