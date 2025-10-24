@@ -40,7 +40,7 @@ export default function Login() {
 
         // Redirect based on whether user has character
         if (response.data.user.characterName) {
-          setLocation("/profile");
+          setLocation("/home");
         } else {
           setLocation("/character-create");
         }
