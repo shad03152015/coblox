@@ -359,18 +359,25 @@ export class MinecraftWorldLoader {
     const chunkX = Math.floor(centerX / 16);
     const chunkZ = Math.floor(centerZ / 16);
 
-    console.log(`🌍 Loading ${(radius * 2 + 1) ** 2} chunks around (${chunkX}, ${chunkZ})`);
+    const totalChunks = (radius * 2 + 1) ** 2;
+    console.log(`🌍 Loading ${totalChunks} chunks around (${chunkX}, ${chunkZ}) progressively...`);
 
-    const promises: Promise<void>[] = [];
+    let loadedCount = 0;
 
+    // Load chunks sequentially with small delay to prevent memory overflow
     for (let dx = -radius; dx <= radius; dx++) {
       for (let dz = -radius; dz <= radius; dz++) {
-        promises.push(this.loadChunk(chunkX + dx, chunkZ + dz));
+        await this.loadChunk(chunkX + dx, chunkZ + dz);
+        loadedCount++;
+        
+        // Small delay between chunks to allow garbage collection
+        if (loadedCount % 3 === 0) {
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
       }
     }
 
-    await Promise.all(promises);
-    console.log(`✅ Finished loading chunks`);
+    console.log(`✅ Finished loading ${loadedCount} chunks`);
   }
 
   /**
