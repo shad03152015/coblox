@@ -385,11 +385,11 @@ export class MinecraftWorldLoader {
       this.scene.remove(chunkGroup);
 
       // Dispose geometries and materials
-      chunkGroup.traverse((child) => {
+      chunkGroup.traverse((child: any) => {
         if (child instanceof THREE.Mesh) {
           child.geometry.dispose();
           if (Array.isArray(child.material)) {
-            child.material.forEach(mat => mat.dispose());
+            child.material.forEach((mat: any) => mat.dispose());
           } else {
             child.material.dispose();
           }
