@@ -557,7 +557,7 @@ export default function SurvivalIsland() {
           <br />
           U - Toggle UI
           <br />
-          0 - Pickaxe
+          9 - Pickaxe
           <br />
           1-8 - Select Block
           <br />
