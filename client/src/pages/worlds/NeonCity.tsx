@@ -21,7 +21,6 @@ export default function NeonCity() {
     controls?: OrbitControls;
     socket?: Socket;
     multiplayerManager?: MultiplayerManager;
-    worldLoader?: MinecraftWorldLoader;
     }>({});
 
   useEffect(() => {
