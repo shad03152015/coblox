@@ -321,6 +321,19 @@ export default function SurvivalIsland() {
         // Setup UI
         setupUI(world, player, physics, scene);
 
+        // Auto-hide instructions overlay and lock controls after world loads
+        setTimeout(() => {
+          const overlay = document.getElementById('overlay');
+          if (overlay) {
+            overlay.style.visibility = 'hidden';
+          }
+          
+          // Lock player controls automatically so they start on the ground
+          if (!player.controls.isLocked) {
+            player.controls.lock();
+          }
+        }, 500); // Small delay to ensure everything is initialized
+
         // Start animation loop
         animate();
       } catch (error) {
