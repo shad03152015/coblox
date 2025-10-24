@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { io, Socket } from "socket.io-client";
 import { MultiplayerManager } from "../../worlds/neon-city/multiplayerManager";
+import { ProceduralCityGenerator } from "../../worlds/neon-city/proceduralCityGenerator";
 
 
 export default function NeonCity() {
