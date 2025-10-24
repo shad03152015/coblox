@@ -16,10 +16,12 @@ import { AvatarPreview } from "@/components/AvatarPreview";
 import { clothingItems, availableColors } from "@/data/clothing";
 import { hairBaseStyles, hairElements } from "@/data/hair";
 import { bodyTypes, skinTones } from "@/data/body";
+import { accessories, accessoryColors } from "@/data/accessories";
 
-type CategoryType = "clothing" | "body" | "hair";
+type CategoryType = "clothing" | "body" | "hair" | "accessories";
 type ClothingTabType = "shirts" | "pants" | "shoes";
 type HairTabType = "base-styles" | "elements";
+type AccessoriesTabType = "hats" | "glasses" | "jewelry" | "wings";
 
 interface ClothingSelection {
   id: string;
@@ -35,6 +37,13 @@ interface HairSelection {
   baseStyle: string;
   elements: string[];
   color: string;
+}
+
+interface AccessoriesSelection {
+  hat?: { id: string; color: string };
+  glasses?: { id: string; color: string };
+  jewelry?: { id: string; color: string };
+  wings?: { id: string; color: string };
 }
 
 export default function AvatarCustomize() {
@@ -70,9 +79,13 @@ export default function AvatarCustomize() {
     color: "black",
   });
 
+  // Accessories selections
+  const [selectedAccessories, setSelectedAccessories] = useState<AccessoriesSelection>({});
+
   // UI state
   const [currentClothingTab, setCurrentClothingTab] = useState<ClothingTabType>("shirts");
   const [currentHairTab, setCurrentHairTab] = useState<HairTabType>("base-styles");
+  const [currentAccessoriesTab, setCurrentAccessoriesTab] = useState<AccessoriesTabType>("hats");
   const [currentColor, setCurrentColor] = useState<string>("red");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
@@ -112,6 +125,9 @@ export default function AvatarCustomize() {
 
           // Load hair
           if (appearance.hair) setSelectedHair(appearance.hair);
+
+          // Load accessories
+          if (appearance.accessories) setSelectedAccessories(appearance.accessories);
         }
       } catch (error: any) {
         if (error.response?.status === 401) {
@@ -271,6 +287,7 @@ export default function AvatarCustomize() {
             shoes: selectedShoes,
             body: selectedBody,
             hair: selectedHair,
+            accessories: selectedAccessories,
           },
         },
         {
