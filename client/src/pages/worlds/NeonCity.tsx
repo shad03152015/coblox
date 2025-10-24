@@ -5,13 +5,12 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { io, Socket } from "socket.io-client";
 import { MultiplayerManager } from "../../../world/neon-city/scripts/multiplayerManager";
-import { MinecraftWorldLoader } from "../../../world/neon-city/scripts/minecraftWorldLoader";
+import { ProceduralCityGenerator } from "../../../world/neon-city/scripts/proceduralCityGenerator";
 
 export default function NeonCity() {
   const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [playerCount, setPlayerCount] = useState(0);
-  const [loadingStatus, setLoadingStatus] = useState("Initializing...");
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<{
     renderer?: THREE.WebGLRenderer;
@@ -22,7 +21,7 @@ export default function NeonCity() {
     controls?: OrbitControls;
     socket?: Socket;
     multiplayerManager?: MultiplayerManager;
-    worldLoader?: MinecraftWorldLoader;
+    cityGenerator?: ProceduralCityGenerator;
   }>({});
 
   useEffect(() => {
@@ -91,17 +90,13 @@ export default function NeonCity() {
         const multiplayerManager = new MultiplayerManager(scene);
         gameRef.current.multiplayerManager = multiplayerManager;
 
-        // Initialize Minecraft World Loader
-        setLoadingStatus("Loading Minecraft world...");
-        const worldLoader = new MinecraftWorldLoader(scene);
-        gameRef.current.worldLoader = worldLoader;
-
-        // Load chunks around spawn point (0, 0)
-        // Loading 3x3 chunk area (48x48 blocks)
-        await worldLoader.loadChunksAround(0, 0, 1);
-        console.log(`📦 Loaded ${worldLoader.getLoadedChunkCount()} chunks`);
+        // Initialize Procedural City Generator
+        const cityGenerator = new ProceduralCityGenerator(scene);
+        gameRef.current.cityGenerator = cityGenerator;
         
-        setLoadingStatus("Connecting to multiplayer...");
+        // Generate the neon city
+        cityGenerator.generate();
+        console.log('🌆 Neon City generated');
 
         // Initialize Socket.io connection
         const socket = io(window.location.origin, {
@@ -173,10 +168,6 @@ export default function NeonCity() {
         directionalLight.shadow.camera.bottom = -100;
         scene.add(directionalLight);
 
-        // Add grid helper
-        const gridHelper = new THREE.GridHelper(200, 50, 0x00ff00, 0x003300);
-        scene.add(gridHelper);
-
         // Add text sprite for "NEON CITY - MULTIPLAYER"
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -187,8 +178,8 @@ export default function NeonCity() {
           context.font = 'Bold 48px Arial';
           context.fillText('NEON CITY', 50, 100);
           context.font = '32px Arial';
-          context.fillText('MINECRAFT WORLD LOADED', 50, 150);
-          context.fillText('Explore the cyberpunk city', 50, 190);
+          context.fillText('CYBERPUNK MULTIPLAYER', 50, 150);
+          context.fillText('Explore the neon city', 50, 190);
         }
 
         const texture = new THREE.CanvasTexture(canvas);
@@ -266,7 +257,7 @@ export default function NeonCity() {
         // Start animation loop
         animate();
         setIsLoading(false);
-        toast.success("Neon City multiplayer enabled!");
+        toast.success("Welcome to Neon City!");
 
       } catch (error) {
         console.error("Error initializing NeonCity:", error);
@@ -289,9 +280,9 @@ export default function NeonCity() {
         gameRef.current.multiplayerManager.clearAllPlayers();
       }
 
-      // Clear world loader
-      if (gameRef.current.worldLoader) {
-        gameRef.current.worldLoader.clearAll();
+      // Clear city generator
+      if (gameRef.current.cityGenerator) {
+        gameRef.current.cityGenerator.clear();
       }
 
       // Cancel animation frame
@@ -339,9 +330,9 @@ export default function NeonCity() {
             textAlign: "center",
           }}
         >
-          <div>{loadingStatus}</div>
+          <div>Initializing Neon City...</div>
           <div style={{ fontSize: "16px", marginTop: "10px", opacity: 0.7 }}>
-            Loading Neon City Minecraft World...
+            Generating Cyberpunk World...
           </div>
         </div>
       )}
@@ -386,15 +377,15 @@ export default function NeonCity() {
         }}
       >
         <h2 style={{ margin: "0 0 10px 0", fontSize: "24px" }}>NEON CITY - MULTIPLAYER</h2>
-        <p style={{ margin: "5px 0" }}>📍 Minecraft 1.16.5 World</p>
+        <p style={{ margin: "5px 0" }}>📍 Procedurally Generated Cyberpunk City</p>
         <p style={{ margin: "5px 0" }}>🎮 Mouse: Rotate View</p>
         <p style={{ margin: "5px 0" }}>🖱️ Scroll: Zoom In/Out</p>
         <p style={{ margin: "5px 0" }}>👥 See other players exploring</p>
         <p style={{ margin: "15px 0 5px 0", fontSize: "14px", opacity: 0.7 }}>
-          Minecraft world rendered with Three.js
+          Explore the procedurally generated city
         </p>
         <p style={{ margin: "5px 0", fontSize: "14px", opacity: 0.7 }}>
-          Socket.io • Three.js • Prismarine
+          Socket.io • Three.js • Multiplayer
         </p>
       </div>
 
