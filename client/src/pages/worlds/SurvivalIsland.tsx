@@ -560,50 +560,6 @@ export default function SurvivalIsland() {
       </div>
 
       <div
-        id="overlay"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-          backgroundColor: "#00000080",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "2em",
-          color: "white",
-          textAlign: "center",
-        }}
-      >
-        <div id="instructions">
-          <h1 style={{ fontSize: "3em" }}>SURVIVAL ISLAND - MULTIPLAYER</h1>
-          WASD - Move
-          <br />
-          SHIFT - Sprint
-          <br />
-          SPACE - Jump
-          <br />
-          R - Reset Camera
-          <br />
-          U - Toggle UI
-          <br />
-          9 - Pickaxe
-          <br />
-          1-8 - Select Block
-          <br />
-          F1 - Save Game
-          <br />
-          F2 - Load Game
-          <br />
-          F10 - Debug Camera
-          <br />
-          <br />
-          <h2>PRESS ANY KEY TO START</h2>
-        </div>
-      </div>
-
-      <div
         id="status"
         style={{
           position: "fixed",
