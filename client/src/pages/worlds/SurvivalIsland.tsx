@@ -131,9 +131,20 @@ export default function SurvivalIsland() {
           });
         });
 
-        socket.on('disconnect', () => {
-          console.log('🔌 Disconnected from multiplayer server');
+        socket.on('disconnect', (reason) => {
+          console.log('🔌 Disconnected from multiplayer server:', reason);
           toast.error('Disconnected from multiplayer');
+          
+          // Clear all other players from the scene when disconnected
+          if (multiplayerManager) {
+            multiplayerManager.clearAllPlayers();
+            setPlayerCount(0);
+          }
+        });
+
+        socket.on('connect_error', (error) => {
+          console.error('❌ Socket connection error:', error);
+          toast.error('Failed to connect to multiplayer server');
         });
 
         socket.on('existing-players', (players: any[]) => {
