@@ -2,16 +2,26 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { io, Socket } from "socket.io-client";
-import { MultiplayerManager } from "../../worlds/neon-city/multiplayerManager";
 import { ProceduralCityGenerator } from "../../worlds/neon-city/proceduralCityGenerator";
+import { PlayerController } from "../../worlds/neon-city/PlayerController";
+import { NPCHunter } from "../../worlds/neon-city/NPCHunter";
 
 
 export default function NeonCity() {
   const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(true);
-  const [playerCount, setPlayerCount] = useState(0);
+  const [distanceTraveled, setDistanceTraveled] = useState(0);
+  const [gameStatus, setGameStatus] = useState<'playing' | 'caught' | 'escaped'>('playing');
+  
+  // Round management state
+  const [currentRound, setCurrentRound] = useState(1);
+  const [maxRounds] = useState(5);
+  const [roundTimer, setRoundTimer] = useState(300); // 5 minutes in seconds
+  const [playerWins, setPlayerWins] = useState(0);
+  const [hunterWins, setHunterWins] = useState(0);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [roundInProgress, setRoundInProgress] = useState(true);
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<{
     renderer?: THREE.WebGLRenderer;
@@ -19,9 +29,11 @@ export default function NeonCity() {
     resizeHandler?: () => void;
     scene?: THREE.Scene;
     camera?: THREE.PerspectiveCamera;
-    controls?: OrbitControls;
-    socket?: Socket;
-    multiplayerManager?: MultiplayerManager;
+    player?: PlayerController;
+    hunter?: NPCHunter;
+    buildings?: THREE.Mesh[];
+    roundStartTime?: number;
+    currentRoundTime?: number;
     }>({});
 
   useEffect(() => {
@@ -32,21 +44,6 @@ export default function NeonCity() {
       setLocation("/");
       return;
     }
-
-    // Get user data for multiplayer
-    const getUserData = () => {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return {
-          userId: payload.userId,
-          username: payload.username || 'Player'
-        };
-      } catch {
-        return { userId: 'unknown', username: 'Player' };
-      }
-    };
-
-    const userData = getUserData();
 
     // Initialize the Three.js scene
     const initScene = async () => {
@@ -65,96 +62,36 @@ export default function NeonCity() {
 
         // Scene setup
         const scene = new THREE.Scene();
-        scene.fog = new THREE.Fog(0x0a0a0a, 50, 200);
+        scene.fog = new THREE.Fog(0x0a0a0a, 30, 100);
         gameRef.current.scene = scene;
 
-        // Camera setup
+        // Camera setup (third-person view)
         const camera = new THREE.PerspectiveCamera(
-          75,
+          60,
           window.innerWidth / window.innerHeight,
           0.1,
-          1000
+          500
         );
-        camera.position.set(50, 50, 50);
         gameRef.current.camera = camera;
 
-        // Controls setup
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.maxDistance = 200;
-        controls.minDistance = 10;
-        gameRef.current.controls = controls;
-
-        // Initialize Multiplayer Manager
-        const multiplayerManager = new MultiplayerManager(scene);
-        gameRef.current.multiplayerManager = multiplayerManager;
-
-        // Generate procedural neon city with buildings and lights
+        // Generate procedural neon city with buildings
         console.log('🌆 Generating Neon City...');
         const cityGenerator = new ProceduralCityGenerator(scene);
         cityGenerator.generate();
+        const buildings = cityGenerator.getBuildings();
+        gameRef.current.buildings = buildings;
         console.log('✅ Neon City generated');
 
-        // Initialize Socket.io connection
-        const socket = io(window.location.origin, {
-          auth: { token }
-        });
-        gameRef.current.socket = socket;
+        // Create player at spawn (0, 0, 0)
+        const player = new PlayerController(scene, new THREE.Vector3(0, 0, 0));
+        gameRef.current.player = player;
 
-        // Socket event handlers
-        socket.on('connect', () => {
-          console.log('🌐 Connected to multiplayer server');
-          toast.success('Connected to multiplayer');
-
-          // Join the neon-city world
-          socket.emit('join-world', {
-            worldId: 'neon-city',
-            username: userData.username
-          });
-        });
-
-        socket.on('disconnect', (reason) => {
-          console.log('🔌 Disconnected from multiplayer server:', reason);
-          toast.error('Disconnected from multiplayer');
-
-          // Clear all other players from the scene when disconnected
-          if (multiplayerManager) {
-            multiplayerManager.clearAllPlayers();
-            setPlayerCount(0);
-          }
-        });
-
-        socket.on('connect_error', (error) => {
-          console.error('❌ Socket connection error:', error);
-          toast.error('Failed to connect to multiplayer server');
-        });
-
-        socket.on('existing-players', (players: any[]) => {
-          console.log(`👥 Received ${players.length} existing players`);
-          multiplayerManager.handleExistingPlayers(players);
-          setPlayerCount(players.length);
-        });
-
-        socket.on('player-joined', (playerData: any) => {
-          console.log(`✅ Player joined: ${playerData.username}`);
-          multiplayerManager.createPlayerAvatar(playerData);
-          setPlayerCount(multiplayerManager.getPlayerCount());
-          toast.success(`${playerData.username} joined`);
-        });
-
-        socket.on('player-moved', (data: any) => {
-          multiplayerManager.updatePlayerPosition(data.id, data.position, data.rotation);
-        });
-
-        socket.on('player-left', (data: any) => {
-          console.log(`👋 Player left: ${data.id}`);
-          multiplayerManager.removePlayer(data.id);
-          setPlayerCount(multiplayerManager.getPlayerCount());
-        });
+        // Create NPC hunter starting far away
+        const hunter = new NPCHunter(scene, new THREE.Vector3(40, 0, 40));
+        gameRef.current.hunter = hunter;
 
         // Lighting
-        const ambientLight = new THREE.AmbientLight(0x404040, 2);
+        const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
         scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -164,34 +101,88 @@ export default function NeonCity() {
         directionalLight.shadow.camera.right = 100;
         directionalLight.shadow.camera.top = 100;
         directionalLight.shadow.camera.bottom = -100;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
         scene.add(directionalLight);
 
-        // Add text sprite for "NEON CITY - MULTIPLAYER"
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        if (context) {
-          canvas.width = 512;
-          canvas.height = 256;
-          context.fillStyle = '#00ff00';
-          context.font = 'Bold 48px Arial';
-          context.fillText('NEON CITY', 50, 100);
-          context.font = '32px Arial';
-          context.fillText('CYBERPUNK MULTIPLAYER', 50, 150);
-          context.fillText('Explore the neon city', 50, 190);
-        }
-
-        const texture = new THREE.CanvasTexture(canvas);
-        const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-        const sprite = new THREE.Sprite(spriteMaterial);
-        sprite.position.set(0, 20, 0);
-        sprite.scale.set(40, 20, 1);
-        scene.add(sprite);
-
-        // Track last sent camera position for multiplayer
-        let lastSentPosition = { x: 0, y: 0, z: 0 };
-        let lastSentRotation = { x: 0, y: 0 };
-        let positionUpdateTimer = 0;
         let previousTime = performance.now();
+        gameRef.current.roundStartTime = previousTime;
+        gameRef.current.currentRoundTime = 0;
+
+        // Function to start new round
+        const startNewRound = (roundNumber: number) => {
+          console.log(`🎮 Starting Round ${roundNumber}`);
+          
+          // Reset player to spawn
+          player.reset(new THREE.Vector3(0, 0, 0));
+          
+          // Reset hunter to starting position
+          hunter.reset(new THREE.Vector3(40, 0, 40));
+          
+          // Reset timers
+          gameRef.current.roundStartTime = performance.now();
+          gameRef.current.currentRoundTime = 0;
+          setRoundTimer(300);
+          setGameStatus('playing');
+          setRoundInProgress(true);
+          setDistanceTraveled(0);
+          
+          toast.success(`Round ${roundNumber} begins! Survive for 5 minutes!`);
+        };
+
+        // Function to end round
+        const endRound = (playerWon: boolean) => {
+          setRoundInProgress(false);
+          
+          if (playerWon) {
+            setPlayerWins(prev => {
+              const newWins = prev + 1;
+              toast.success(`🎉 Round ${currentRound} - You Escaped! (${newWins}/${currentRound} wins)`, {
+                duration: 3000
+              });
+              return newWins;
+            });
+            setGameStatus('escaped');
+          } else {
+            setHunterWins(prev => {
+              const newLosses = prev + 1;
+              toast.error(`💀 Round ${currentRound} - Caught! Distance: ${player.distanceTraveled.toFixed(1)}m`, {
+                duration: 3000
+              });
+              return newLosses;
+            });
+            setGameStatus('caught');
+          }
+          
+          // Check if game is over (5 rounds completed)
+          if (currentRound >= maxRounds) {
+            setTimeout(() => {
+              setIsGameOver(true);
+              const finalPlayerWins = playerWon ? playerWins + 1 : playerWins;
+              const finalHunterWins = playerWon ? hunterWins : hunterWins + 1;
+              
+              if (finalPlayerWins > finalHunterWins) {
+                toast.success(`🏆 GAME OVER - You Win! ${finalPlayerWins}-${finalHunterWins}`, {
+                  duration: 5000
+                });
+              } else if (finalHunterWins > finalPlayerWins) {
+                toast.error(`💀 GAME OVER - Hunter Wins! ${finalHunterWins}-${finalPlayerWins}`, {
+                  duration: 5000
+                });
+              } else {
+                toast(`🤝 GAME OVER - Tie! ${finalPlayerWins}-${finalHunterWins}`, {
+                  duration: 5000
+                });
+              }
+            }, 3000);
+          } else {
+            // Start next round after delay
+            setTimeout(() => {
+              setCurrentRound(prev => prev + 1);
+              startNewRound(currentRound + 1);
+            }, 4000);
+          }
+        };
 
         // Animation loop
         function animate() {
@@ -201,41 +192,56 @@ export default function NeonCity() {
           const currentTime = performance.now();
           const dt = (currentTime - previousTime) / 1000;
 
-          // Update controls
-          controls.update();
-
-          // Send camera position updates to server periodically (5 times per second)
-          positionUpdateTimer += dt;
-          if (positionUpdateTimer >= 0.2) {
-            positionUpdateTimer = 0;
-
-            const currentPos = camera.position;
-            const currentRot = { x: camera.rotation.x, y: camera.rotation.y };
-
-            // Only send if position or rotation changed significantly
-            const posChanged = Math.abs(currentPos.x - lastSentPosition.x) > 0.1 ||
-                              Math.abs(currentPos.y - lastSentPosition.y) > 0.1 ||
-                              Math.abs(currentPos.z - lastSentPosition.z) > 0.1;
-            const rotChanged = Math.abs(currentRot.x - lastSentRotation.x) > 0.01 ||
-                              Math.abs(currentRot.y - lastSentRotation.y) > 0.01;
-
-            if ((posChanged || rotChanged) && socket.connected) {
-              socket.emit('player-move', {
-                position: { x: currentPos.x, y: currentPos.y, z: currentPos.z },
-                rotation: { x: currentRot.x, y: currentRot.y },
-                worldId: 'neon-city'
-              });
-
-              lastSentPosition = { x: currentPos.x, y: currentPos.y, z: currentPos.z };
-              lastSentRotation = { x: currentRot.x, y: currentRot.y };
+          if (roundInProgress && player.isAlive && buildings && !isGameOver) {
+            // Update round timer
+            gameRef.current.currentRoundTime = (currentTime - (gameRef.current.roundStartTime || currentTime)) / 1000;
+            const timeRemaining = Math.max(0, 300 - gameRef.current.currentRoundTime);
+            setRoundTimer(timeRemaining);
+            
+            // Check if time expired (player wins round)
+            if (timeRemaining <= 0) {
+              endRound(true);
             }
+            
+            // Update player
+            player.update(dt, buildings, camera);
+
+            // Update hunter with physics parameters
+            const caught = hunter.update(
+              dt, 
+              player.getPosition(),
+              player.getVelocity(),
+              player.getCurrentSpeed(),
+              buildings,
+              gameRef.current.currentRoundTime
+            );
+
+            if (caught) {
+              player.setCaught();
+              endRound(false);
+            }
+
+            // Update distance display
+            setDistanceTraveled(player.distanceTraveled);
+
+            // Update camera to follow player (third-person)
+            const playerPos = player.getPosition();
+            const cameraOffset = new THREE.Vector3(0, 8, 12);
+            
+            // Rotate offset based on player direction
+            const rotationMatrix = new THREE.Matrix4().makeRotationY(player.mesh.rotation.y);
+            cameraOffset.applyMatrix4(rotationMatrix);
+            
+            const targetCameraPos = playerPos.clone().add(cameraOffset);
+            
+            // Smooth camera follow
+            camera.position.lerp(targetCameraPos, 0.1);
+            
+            // Look at player
+            const lookAtTarget = playerPos.clone();
+            lookAtTarget.y += 1;
+            camera.lookAt(lookAtTarget);
           }
-
-          // Update multiplayer manager (smooth interpolation of other players)
-          multiplayerManager.update(dt);
-
-          // Update nameplates to face camera
-          multiplayerManager.updateNameplates(camera);
 
           // Render scene
           renderer.render(scene, camera);
@@ -255,7 +261,7 @@ export default function NeonCity() {
         // Start animation loop
         animate();
         setIsLoading(false);
-        toast.success("Welcome to Neon City!");
+        toast.success("Round 1 of 5 - Survive 5 minutes to win!");
 
       } catch (error) {
         console.error("Error initializing NeonCity:", error);
@@ -268,14 +274,14 @@ export default function NeonCity() {
 
     // Cleanup function
     return () => {
-      // Disconnect socket
-      if (gameRef.current.socket) {
-        gameRef.current.socket.disconnect();
+      // Dispose player
+      if (gameRef.current.player) {
+        gameRef.current.player.dispose();
       }
 
-      // Clear multiplayer manager
-      if (gameRef.current.multiplayerManager) {
-        gameRef.current.multiplayerManager.clearAllPlayers();
+      // Dispose hunter
+      if (gameRef.current.hunter) {
+        gameRef.current.hunter.dispose();
       }
 
       // Cancel animation frame
@@ -296,6 +302,12 @@ export default function NeonCity() {
     };
   }, [setLocation]);
 
+  // Format timer display
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div
@@ -326,12 +338,12 @@ export default function NeonCity() {
         >
           <div>Initializing Neon City...</div>
           <div style={{ fontSize: "16px", marginTop: "10px", opacity: 0.7 }}>
-            Generating Cyberpunk World...
+            Loading Chase Game...
           </div>
         </div>
       )}
 
-      {/* Multiplayer player count indicator */}
+      {/* Game Stats HUD */}
       <div
         style={{
           position: "absolute",
@@ -345,14 +357,48 @@ export default function NeonCity() {
           fontFamily: "monospace",
           fontWeight: "bold",
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
           gap: "8px",
           border: "2px solid #00ff00",
           zIndex: 100,
+          minWidth: "220px"
         }}
       >
-        <span style={{ fontSize: "24px" }}>👥</span>
-        <span>{playerCount + 1} Player{playerCount !== 0 ? 's' : ''} Online</span>
+        <div style={{ fontSize: "22px", borderBottom: "1px solid #00ff00", paddingBottom: "8px" }}>
+          🏃 ROUND {currentRound}/{maxRounds}
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>⏱️ Time:</span>
+          <span style={{
+            color: roundTimer < 60 ? '#ff0000' : '#00ff00',
+            fontWeight: 'bold'
+          }}>
+            {formatTime(roundTimer)}
+          </span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>Distance:</span>
+          <span>{distanceTraveled.toFixed(1)}m</span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>Status:</span>
+          <span style={{ 
+            color: gameStatus === 'playing' ? '#00ff00' : gameStatus === 'escaped' ? '#00ffff' : '#ff0000',
+            fontWeight: 'bold'
+          }}>
+            {gameStatus === 'playing' ? '⚡ RUNNING' : gameStatus === 'escaped' ? '✅ ESCAPED' : '💀 CAUGHT'}
+          </span>
+        </div>
+        <div style={{ borderTop: "1px solid #00ff00", paddingTop: "8px", marginTop: "4px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px" }}>
+            <span>Your Wins:</span>
+            <span style={{ color: '#00ffff' }}>{playerWins}</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px" }}>
+            <span>Hunter Wins:</span>
+            <span style={{ color: '#ff0000' }}>{hunterWins}</span>
+          </div>
+        </div>
       </div>
 
       {/* Instructions overlay */}
@@ -370,18 +416,59 @@ export default function NeonCity() {
           zIndex: 100,
         }}
       >
-        <h2 style={{ margin: "0 0 10px 0", fontSize: "24px" }}>NEON CITY - MULTIPLAYER</h2>
-        <p style={{ margin: "5px 0" }}>📍 Procedurally Generated Cyberpunk City</p>
-        <p style={{ margin: "5px 0" }}>🎮 Mouse: Rotate View</p>
-        <p style={{ margin: "5px 0" }}>🖱️ Scroll: Zoom In/Out</p>
-        <p style={{ margin: "5px 0" }}>👥 See other players exploring</p>
+        <h2 style={{ margin: "0 0 10px 0", fontSize: "24px" }}>NEON CITY - 5 ROUNDS!</h2>
+        <p style={{ margin: "5px 0" }}>🎯 Survive 5 minutes to win each round</p>
+        <p style={{ margin: "5px 0" }}>👹 Advanced AI hunter with physics-based pursuit</p>
+        <p style={{ margin: "5px 0" }}>🎮 W/A/S/D or Arrow Keys - Move</p>
+        <p style={{ margin: "5px 0" }}>⚡ Shift - Sprint (run faster)</p>
+        <p style={{ margin: "5px 0" }}>🏢 Use buildings as cover!</p>
         <p style={{ margin: "15px 0 5px 0", fontSize: "14px", opacity: 0.7 }}>
-          Explore the procedurally generated city
-        </p>
-        <p style={{ margin: "5px 0", fontSize: "14px", opacity: 0.7 }}>
-          Socket.io • Three.js • Multiplayer
+          Win 3+ rounds to win the game!
         </p>
       </div>
+
+      {/* Game Over Overlay */}
+      {isGameOver && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "rgba(0, 0, 0, 0.95)",
+            color: playerWins > hunterWins ? "#00ff00" : "#ff0000",
+            padding: "40px 60px",
+            borderRadius: "20px",
+            fontFamily: "monospace",
+            border: `4px solid ${playerWins > hunterWins ? "#00ff00" : "#ff0000"}`,
+            zIndex: 200,
+            textAlign: "center",
+          }}
+        >
+          <h1 style={{ margin: "0 0 20px 0", fontSize: "48px" }}>
+            {playerWins > hunterWins ? "🏆 VICTORY!" : playerWins < hunterWins ? "💀 DEFEAT!" : "🤝 TIE!"}
+          </h1>
+          <p style={{ fontSize: "32px", margin: "10px 0" }}>
+            Final Score: {playerWins} - {hunterWins}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              marginTop: "30px",
+              padding: "15px 40px",
+              backgroundColor: playerWins > hunterWins ? "#00ff00" : "#ff0000",
+              color: "#000",
+              border: "none",
+              borderRadius: "10px",
+              cursor: "pointer",
+              fontSize: "20px",
+              fontWeight: "bold",
+            }}
+          >
+            Play Again
+          </button>
+        </div>
+      )}
 
       {/* Back button */}
       <button
