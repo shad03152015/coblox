@@ -1,24 +1,5 @@
 import * as THREE from 'three';
 
-// Import all textures as ES modules for proper Vite bundling
-import cactusSideImg from '../../../../world/survival-island/public/textures/cactus_side.png';
-import cactusTopImg from '../../../../world/survival-island/public/textures/cactus_top.png';
-import dirtImg from '../../../../world/survival-island/public/textures/dirt.png';
-import grassImg from '../../../../world/survival-island/public/textures/grass.png';
-import grassSideImg from '../../../../world/survival-island/public/textures/grass_side.png';
-import coalOreImg from '../../../../world/survival-island/public/textures/coal_ore.png';
-import ironOreImg from '../../../../world/survival-island/public/textures/iron_ore.png';
-import jungleTreeSideImg from '../../../../world/survival-island/public/textures/jungle_tree_side.png';
-import jungleTreeTopImg from '../../../../world/survival-island/public/textures/jungle_tree_top.png';
-import jungleLeavesImg from '../../../../world/survival-island/public/textures/jungle_leaves.png';
-import leavesImg from '../../../../world/survival-island/public/textures/leaves.png';
-import treeSideImg from '../../../../world/survival-island/public/textures/tree_side.png';
-import treeTopImg from '../../../../world/survival-island/public/textures/tree_top.png';
-import sandImg from '../../../../world/survival-island/public/textures/sand.png';
-import snowImg from '../../../../world/survival-island/public/textures/snow.png';
-import snowSideImg from '../../../../world/survival-island/public/textures/snow_side.png';
-import stoneImg from '../../../../world/survival-island/public/textures/stone.png';
-
 const textureLoader = new THREE.TextureLoader();
 
 function loadTexture(path) {
@@ -29,24 +10,25 @@ function loadTexture(path) {
   return texture;
 }
 
+// Use direct URL paths served by Express
 const textures = {
-  cactusSide: loadTexture(cactusSideImg),
-  cactusTop: loadTexture(cactusTopImg),
-  dirt: loadTexture(dirtImg),
-  grass: loadTexture(grassImg),
-  grassSide: loadTexture(grassSideImg),
-  coalOre: loadTexture(coalOreImg),
-  ironOre: loadTexture(ironOreImg),
-  jungleTreeSide: loadTexture(jungleTreeSideImg),
-  jungleTreeTop: loadTexture(jungleTreeTopImg),
-  jungleLeaves: loadTexture(jungleLeavesImg),
-  leaves: loadTexture(leavesImg),
-  treeSide: loadTexture(treeSideImg),
-  treeTop: loadTexture(treeTopImg),
-  sand: loadTexture(sandImg),
-  snow: loadTexture(snowImg),
-  snowSide: loadTexture(snowSideImg),
-  stone: loadTexture(stoneImg),
+  cactusSide: loadTexture('/world/survival-island/public/textures/cactus_side.png'),
+  cactusTop: loadTexture('/world/survival-island/public/textures/cactus_top.png'),
+  dirt: loadTexture('/world/survival-island/public/textures/dirt.png'),
+  grass: loadTexture('/world/survival-island/public/textures/grass.png'),
+  grassSide: loadTexture('/world/survival-island/public/textures/grass_side.png'),
+  coalOre: loadTexture('/world/survival-island/public/textures/coal_ore.png'),
+  ironOre: loadTexture('/world/survival-island/public/textures/iron_ore.png'),
+  jungleTreeSide: loadTexture('/world/survival-island/public/textures/jungle_tree_side.png'),
+  jungleTreeTop: loadTexture('/world/survival-island/public/textures/jungle_tree_top.png'),
+  jungleLeaves: loadTexture('/world/survival-island/public/textures/jungle_leaves.png'),
+  leaves: loadTexture('/world/survival-island/public/textures/leaves.png'),
+  treeSide: loadTexture('/world/survival-island/public/textures/tree_side.png'),
+  treeTop: loadTexture('/world/survival-island/public/textures/tree_top.png'),
+  sand: loadTexture('/world/survival-island/public/textures/sand.png'),
+  snow: loadTexture('/world/survival-island/public/textures/snow.png'),
+  snowSide: loadTexture('/world/survival-island/public/textures/snow_side.png'),
+  stone: loadTexture('/world/survival-island/public/textures/stone.png'),
 };
 
 export const blocks = {
