@@ -79,7 +79,7 @@ export class Player {
     // Add event listeners for keyboard/mouse events
     document.addEventListener('keyup', this.onKeyUp.bind(this));
     document.addEventListener('keydown', this.onKeyDown.bind(this));
-    document.addEventListener('mousemove', this.onMouseDown.bind(this));
+    document.addEventListener('mousedown', this.onMouseDown.bind(this));
   }
 
   onCameraLock() {
