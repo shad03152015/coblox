@@ -1,0 +1,7 @@
+# Exclude large world files from build
+world/neon-city/region/*.mca
+world/neon-city/*.dat
+world/neon-city/*.dat_old
+world/neon-city/resources.zip
+world/*/region/*.mca
+world/*/*.dat
