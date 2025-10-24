@@ -6,7 +6,34 @@ import path from "path";
 import { defineConfig } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
+// Custom plugin to exclude large world files from build
+const excludeWorldFilesPlugin = () => ({
+  name: 'exclude-world-files',
+  resolveId(id: string) {
+    // Completely ignore world directory imports
+    if (id.includes('/world/neon-city/') || id.includes('\\world\\neon-city\\')) {
+      if (id.includes('.mca') || id.includes('.dat') || id.includes('region/')) {
+        return { id: 'world-file-excluded', external: true };
+      }
+    }
+    return null;
+  },
+  load(id: string) {
+    // Don't load world files
+    if (id === 'world-file-excluded') {
+      return 'export default {}';
+    }
+    return null;
+  }
+});
+
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  excludeWorldFilesPlugin()
+];
 
 export default defineConfig({
   plugins,
