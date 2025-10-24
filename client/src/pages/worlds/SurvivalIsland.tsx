@@ -61,25 +61,53 @@ export default function SurvivalIsland() {
       if (!containerRef.current) return;
 
       try {
+        console.log('🎮 Initializing Survival Island...');
+        
         // Import game modules dynamically
+        console.log('📦 Loading game modules...');
         const { World } = await import(
           "../../../world/survival-island/scripts/world.js"
-        );
+        ).catch(err => {
+          console.error('❌ Failed to load World module:', err);
+          throw new Error('Failed to load World module');
+        });
+        
         const { Player } = await import(
           "../../../world/survival-island/scripts/player.js"
-        );
+        ).catch(err => {
+          console.error('❌ Failed to load Player module:', err);
+          throw new Error('Failed to load Player module');
+        });
+        
         const { Physics } = await import(
           "../../../world/survival-island/scripts/physics.js"
-        );
+        ).catch(err => {
+          console.error('❌ Failed to load Physics module:', err);
+          throw new Error('Failed to load Physics module');
+        });
+        
         const { setupUI } = await import(
           "../../../world/survival-island/scripts/ui.js"
-        );
+        ).catch(err => {
+          console.error('❌ Failed to load UI module:', err);
+          throw new Error('Failed to load UI module');
+        });
+        
         const { ModelLoader } = await import(
           "../../../world/survival-island/scripts/modelLoader.js"
-        );
+        ).catch(err => {
+          console.error('❌ Failed to load ModelLoader module:', err);
+          throw new Error('Failed to load ModelLoader module');
+        });
+        
         const { MultiplayerManager } = await import(
           "../../../world/survival-island/scripts/multiplayerManager.js"
-        );
+        ).catch(err => {
+          console.error('❌ Failed to load MultiplayerManager module:', err);
+          throw new Error('Failed to load MultiplayerManager module');
+        });
+
+        console.log('✅ All modules loaded successfully');
 
         // Stats setup
         const stats = new Stats();
@@ -334,22 +362,31 @@ export default function SurvivalIsland() {
 
         // Auto-hide instructions overlay and lock controls after world loads
         setTimeout(() => {
-          const overlay = document.getElementById('overlay');
-          if (overlay) {
-            overlay.style.visibility = 'hidden';
-          }
+          try {
+            const overlay = document.getElementById('overlay');
+            if (overlay) {
+              overlay.style.visibility = 'hidden';
+              console.log('✅ Overlay hidden');
+            }
           
-          // Lock player controls automatically so they start on the ground
-          if (!player.controls.isLocked) {
-            player.controls.lock();
+            // Lock player controls automatically so they start on the ground
+            if (player && player.controls && !player.controls.isLocked) {
+              player.controls.lock();
+              console.log('✅ Player controls locked');
+            } else {
+              console.warn('⚠️ Player or controls not ready for locking');
+            }
+          } catch (err) {
+            console.error('❌ Error during auto-initialization:', err);
           }
         }, 500); // Small delay to ensure everything is initialized
 
         // Start animation loop
         animate();
+        console.log('✅ Survival Island initialized successfully');
       } catch (error) {
-        console.error("Error initializing Survival Island game:", error);
-        toast.error("Failed to load game. Please try again.");
+        console.error("❌ Error initializing Survival Island game:", error);
+        toast.error(`Failed to load game: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     };
 
