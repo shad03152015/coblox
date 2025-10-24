@@ -68,7 +68,7 @@ export default function CharacterCreate() {
 
       if (response.data.success) {
         toast.success("Character created successfully!");
-        setLocation("/profile");
+        setLocation("/avatar-customize");
       }
     } catch (error: any) {
       if (error.response?.data?.error) {
