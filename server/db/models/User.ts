@@ -18,6 +18,11 @@ const userSchema = new mongoose.Schema({
     sparse: true,
     trim: true,
   },
+  avatarAppearance: {
+    type: Object,
+    default: null,
+    required: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
