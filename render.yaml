@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: blockverse-app
+    runtime: node
+    plan: free
+    buildCommand: pnpm install && pnpm run build
+    startCommand: pnpm start
+    envVars:
+      - key: MONGODB_URI
+        sync: false  # Set manually in Render dashboard (contains secrets)
+      - key: JWT_SECRET
+        sync: false  # Set manually in Render dashboard (contains secrets)
+      - key: VITE_APP_TITLE
+        value: BlockVerse
+      - key: NODE_ENV
+        value: production
