@@ -1,0 +1,22 @@
+{
+  "minecraft:story/obtain_armor": {
+    "criteria": {
+      "iron_leggings": "2024-08-05 22:06:46 -0500"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:mushroom_fields": "2024-08-05 22:00:57 -0500",
+      "minecraft:jungle": "2024-08-05 22:00:58 -0500"
+    },
+    "done": false
+  },
+  "minecraft:adventure/root": {
+    "criteria": {
+      "killed_by_something": "2024-08-05 21:58:13 -0500"
+    },
+    "done": true
+  },
+  "DataVersion": 3953
+}

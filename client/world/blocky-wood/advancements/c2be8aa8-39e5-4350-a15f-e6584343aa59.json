@@ -1,0 +1,58 @@
+{
+  "vanillatweaks:root": {
+    "criteria": {
+      "tick": "2024-05-22 20:43:27 -0500"
+    },
+    "done": true
+  },
+  "minecraft:story/obtain_armor": {
+    "criteria": {
+      "iron_leggings": "2024-05-22 20:51:49 -0500"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/iron_nugget_from_smelting": {
+    "criteria": {
+      "has_iron_sword": "2024-05-22 20:51:49 -0500"
+    },
+    "done": true
+  },
+  "armor_statues:enable": {
+    "criteria": {
+      "tick": "2024-05-22 20:43:27 -0500"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/crafting_table": {
+    "criteria": {
+      "unlock_right_away": "2024-05-22 20:43:27 -0500"
+    },
+    "done": true
+  },
+  "minecraft:adventure/root": {
+    "criteria": {
+      "killed_something": "2024-05-22 20:57:19 -0500"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/iron_nugget_from_blasting": {
+    "criteria": {
+      "has_iron_sword": "2024-05-22 20:51:49 -0500"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:mushroom_fields": "2024-05-22 20:45:17 -0500",
+      "minecraft:jungle": "2024-05-22 20:45:26 -0500"
+    },
+    "done": false
+  },
+  "vanillatweaks:armor_statues": {
+    "criteria": {
+      "tick": "2024-05-22 20:43:27 -0500"
+    },
+    "done": true
+  },
+  "DataVersion": 3700
+}

@@ -1,0 +1,16 @@
+{
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:mushroom_fields": "2024-07-13 07:34:56 -0500",
+      "minecraft:jungle": "2024-07-13 07:35:06 -0500"
+    },
+    "done": false
+  },
+  "minecraft:adventure/totem_of_undying": {
+    "criteria": {
+      "used_totem": "2024-07-13 07:40:24 -0500"
+    },
+    "done": true
+  },
+  "DataVersion": 3953
+}

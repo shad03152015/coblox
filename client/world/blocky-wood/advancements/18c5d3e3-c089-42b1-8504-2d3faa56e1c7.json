@@ -1,0 +1,28 @@
+{
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:mushroom_fields": "2024-07-12 19:02:44 -0500",
+      "minecraft:jungle": "2024-07-12 19:06:07 -0500"
+    },
+    "done": false
+  },
+  "minecraft:story/obtain_armor": {
+    "criteria": {
+      "iron_leggings": "2024-07-12 19:40:43 -0500"
+    },
+    "done": true
+  },
+  "minecraft:adventure/root": {
+    "criteria": {
+      "killed_by_something": "2024-07-12 20:26:18 -0500"
+    },
+    "done": true
+  },
+  "minecraft:adventure/totem_of_undying": {
+    "criteria": {
+      "used_totem": "2024-08-05 21:31:10 -0500"
+    },
+    "done": true
+  },
+  "DataVersion": 3953
+}
